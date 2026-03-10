@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMate - AI Nutrition Tracking</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1503.0.min.js"></script>
+    <script src="aws-config.js"></script>
+    <style>
+        .bedrock-analysis-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: rgb(19, 80, 35);
+            padding: 60px 0;
+            margin: 40px 0;
+        }
+        
+        .analysis-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .upload-area {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .upload-area.dragover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .analysis-results {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nutrition-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .gallery-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .gallery-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Your existing header and hero sections -->
+    <header class="header">
+        <a href="index.html" class="logo">MealMate</a>
+        <div class="auth-buttons">
+            <a href="login.html" class="btn btn-signin">Log In</a>
+            <a href="register_info.html" class="btn btn-register">Register</a>
+        </div>
+    </header>
+
+    <!-- AI Nutrition Analysis Section (Integrated Recommendations) -->
+    <section class="bedrock-analysis-section">
+        <div class="analysis-container">
+         <h1 style="text-align: center; margin-bottom: 40px; font-size: 2.5rem;">
+                AI-Powered Nutrition Analysis
+            </h1>
+            <p style="text-align: center; margin-bottom: 40px; font-size: 1.2rem; opacity: 0.9;">
+                Upload a photo of your food and get instant nutritional insights powered by AWS Bedrock AI
+            </p>
+            
+            <!-- Upload Area -->
+            <div class="upload-area" id="uploadArea">
+                <div id="uploadContent">
+                    <h3>📸 Upload Food Image</h3>
+                    <p>Drag and drop your food photo here, or click to select</p>
+                    <input type="file" id="foodImageInput" class="file-input" accept="image/*">
+                    <button class="upload-btn" onclick="document.getElementById('foodImageInput').click()">
+                        Choose Image
+                    </button>
+                </div>
+                <div id="uploadStatus" style="display: none;"></div>
+            </div>
+            
+            <!-- Gallery of S3 Images -->
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="upload-btn" onclick="loadFoodGallery()">
+                    📁 Load Food Gallery
+                </button>
+            </div>
+            <div id="foodGallery" class="gallery-section"></div>
+            
+            <!-- Analysis Results -->
+            <div id="nutritionResults" class="analysis-results" style="display: none;">
+                <h3>🍎 Nutrition Analysis Results</h3>
+                <div id="analysisContent"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Your existing sections continue here -->
+    
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        
+        // File upload handling
+        const fileInput = document.getElementById('foodImageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const resultsDiv = document.getElementById('nutritionResults');
+        
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                analyzeUploadedImage(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                analyzeUploadedImage(e.target.files[0]);
+            }
+        });
+        
+        // Analyze uploaded image
+        async function analyzeUploadedImage(file) {
+            showUploadStatus('Analyzing your food image with AI...', 'loading');
+            showResults('', true);
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch(`${API_BASE}/analyze-image`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showUploadStatus('✅ Analysis completed!', 'success');
+                    displayNutritionAnalysis(result.analysis, result.filename);
+                } else {
+                    showUploadStatus(`❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showUploadStatus(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Load food gallery from S3
+        async function loadFoodGallery() {
+            const galleryDiv = document.getElementById('foodGallery');
+            galleryDiv.innerHTML = '<div class="loading-spinner"></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/list-s3-images`);
+                const result = await response.json();
+                
+                if (result.images && result.images.length > 0) {
+                    galleryDiv.innerHTML = '';
+                    result.images.forEach(image => {
+                        const galleryItem = document.createElement('div');
+                        galleryItem.className = 'gallery-item';
+                        galleryItem.innerHTML = `
+                            <h1>📷 ${image.filename}</h1>
+                            <p>${(image.size / 1024).toFixed(1)} KB</p>
+                            <button class="upload-btn" onclick="analyzeGalleryImage('${image.key}', '${image.filename}')" style="padding: 8px 16px; font-size: 14px;">
+                                Analyze
+                            </button>
+                        `;
+                        galleryDiv.appendChild(galleryItem);
+                    });
+                } else {
+                    galleryDiv.innerHTML = '<p style="text-align: center; opacity: 0.7;">No images found in gallery</p>';
+                }
+            } catch (error) {
+                galleryDiv.innerHTML = `<p style="text-align: center; color: #ff6b6b;">Error loading gallery: ${error.message}</p>`;
+            }
+        }
+        
+        // Analyze image from gallery
+        async function analyzeGalleryImage(s3Key, filename) {
+            showUploadStatus(`Analyzing ${filename} with AI...`, 'loading');
+            showResults('', true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/analyze-s3-image`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ s3_key: s3Key })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showUploadStatus('✅ Analysis completed!', 'success');
+                    displayNutritionAnalysis(result.analysis, filename);
+                } else {
+                    showUploadStatus(`❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showUploadStatus(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Display nutrition analysis
+        function displayNutritionAnalysis(analysis, filename) {
+            const analysisContent = document.getElementById('analysisContent');
+            
+            // Parse the analysis into structured format
+            const sections = analysis.split('\n\n');
+            let formattedAnalysis = `<div class="nutrition-card">
+                <h4>📊 Analysis for: ${filename}</h4>
+            </div>`;
+            
+            sections.forEach(section => {
+                if (section.trim()) {
+                    formattedAnalysis += `<div class="nutrition-card">
+                        <p>${section.trim().replace(/\n/g, '<br>')}</p>
+                    </div>`;
+                }
+            });
+            
+            analysisContent.innerHTML = formattedAnalysis;
+            showResults('', false);
+        }
+        
+        // Show upload status
+        function showUploadStatus(message, type) {
+            uploadStatus.innerHTML = `<p style="color: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#fff'}; text-align: center; margin: 20px 0;">
+                ${type === 'loading' ? '<div class="loading-spinner"></div>' : ''}
+                ${message}
+            </p>`;
+            uploadStatus.style.display = 'block';
+        }
+        
+        // Show/hide results section
+        function showResults(content, loading) {
+            resultsDiv.style.display = 'block';
+            if (loading) {
+                document.getElementById('analysisContent').innerHTML = '<div class="loading-spinner"></div><p style="text-align: center;">Processing your food image...</p>';
+            }
+        }
+        
+        // Auto-load gallery on page load
+        window.addEventListener('load', () => {
+            setTimeout(loadFoodGallery, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Existing Users - MealMate</title>
+</head>
+<body>
+    <h1>Update Existing Users</h1>
+    <button onclick="updateUsers()">Update All Users with Missing Fields</button>
+    <div id="result"></div>
+
+    <script>
+    async function updateUsers() {
+        const API_BASE = 'https://rzscchcv11.execute-api.us-east-1.amazonaws.com/Prod';
+        
+        // Sample data to add to existing users
+        const updates = [
+            {
+                userId: 'user_1735074066463', // Replace with actual user IDs
+                age: 25,
+                weight: 70,
+                height: 175,
+                calorieGoal: 2000
+            }
+            // Add more users as needed
+        ];
+        
+        document.getElementById('result').innerHTML = '<p>Updating users...</p>';
+        
+        for (const update of updates) {
+            try {
+                const response = await fetch(`${API_BASE}/user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(update)
+                });
+                
+                if (response.ok) {
+                    console.log(`Updated user ${update.userId}`);
+                } else {
+                    console.error(`Failed to update user ${update.userId}`);
+                }
+            } catch (error) {
+                console.error(`Error updating user ${update.userId}:`, error);
+            }
+        }
+        
+        document.getElementById('result').innerHTML = '<p>Update complete! Check DynamoDB.</p>';
+    }
+    </script>
+</body>
+</html>

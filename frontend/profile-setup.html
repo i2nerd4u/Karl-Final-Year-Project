@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - MealMate</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://amazon-cognito-identity-js.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+    </header>
+
+    <div class="main-container">
+        <div class="form-section">
+            <div class="form-container">
+                <h1 class="form-title">Complete Your Profile</h1>
+                <p class="form-subtitle">Help us personalize your experience</p>
+                <form class="profile-form" id="profileForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="13" max="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="weight" min="1" max="500" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" name="height" min="50" max="300" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Maintence">Desired Calorie Maintenance (cal)</label>
+                        <input type="number" id="Maintence" name="calorieGoal" min="50" max="5000" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Complete Profile</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="image-section">
+            <!-- Image section content remains the same -->
+        </div>
+    </div>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+
+    <script>
+    // Configure AWS
+    AWS.config.region = 'us-east-1';
+    
+    // Configure Cognito Identity Pool
+    const poolData = {
+        UserPoolId: 'us-east-1_oAOmljHdf',
+        ClientId: '5llflsvkajtph9u24av508moe2'
+    };
+
+    const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    const cognitoUser = userPool.getCurrentUser();
+
+    // Initialize DynamoDB
+    const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!cognitoUser) {
+            alert('Please log in first');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const weight = parseFloat(document.getElementById('weight').value);
+        const height = parseInt(document.getElementById('height').value);
+        const bmi = weight / Math.pow(height / 100, 2);
+        
+        const formData = {
+            userId: cognitoUser.username,
+            name: document.getElementById('name').value,
+            age: parseInt(document.getElementById('age').value),
+            weight: weight,
+            height: height,
+            bmi: parseFloat(bmi.toFixed(2)),
+            calorieGoal: parseInt(document.getElementById('Maintence').value),
+            createdAt: new Date().toISOString()
+        };
+
+        const params = {
+            TableName: 'MealMateUserProfiles',
+            Item: formData
+        };
+
+        try {
+            await dynamodb.put(params).promise();
+            alert('Profile created successfully!');
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            alert('Error saving profile. Please try again.');
+        }
+    });
+    </script>
+</body>
+</html>

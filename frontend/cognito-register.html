@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognito Register - MealMate</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.10/amazon-cognito-identity.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+        <div class="auth-buttons">
+            <a href="cognito-login.html" class="btn btn-signin">Cognito Login</a>
+            <a href="register_info.html" class="btn btn-register">Standard Register</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="form-section">
+            <div class="form-container">
+                <h1 class="form-title">Create Cognito Account</h1>
+                <p class="form-subtitle">Register with AWS Cognito</p>
+                <form class="login-form" id="cognitoRegisterForm">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="weight" min="1" max="500" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" name="height" min="50" max="300" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="calorieGoal">Calorie Goal (cal)</label>
+                        <input type="number" id="calorieGoal" name="calorieGoal" min="50" max="5000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="register-btn">Register</button>
+                    <div class="divider">
+                    </div>
+                    <div class="signup-prompt">Already have an account?</div>
+                    <a href="cognito-login.html" class="signup-link">Sign In</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="image-section">
+            <div class="background-decoration"></div>
+            <div class="image-container">
+                <div class="welcome-back-visual">
+                    <div class="circular-display">
+                        <div class="circular-display-content">
+                            <span class="icon">🔐</span>
+                            <div class="progress">
+                                Secure<br>Registration
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="image-title">AWS Cognito Registration</h2>
+                <p class="image-description">
+                    Create a secure account powered by Amazon Cognito
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+
+    <script src="aws-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('cognitoRegisterForm');
+            
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Get form data
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const weight = document.getElementById('weight').value;
+                    const height = document.getElementById('height').value;
+                    const calorieGoal = document.getElementById('calorieGoal').value;
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    // Validate passwords match
+                    if (password !== confirmPassword) {
+                        alert("Passwords don't match");
+                        return;
+                    }
+                    
+                    // Initialize Cognito user pool
+                    const poolData = {
+                        UserPoolId: cognitoConfig.UserPoolId,
+                        ClientId: cognitoConfig.ClientId
+                    };
+                    
+                    const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+                    
+                    // Define user attributes
+                    const attributeList = [];
+                    
+                    const dataName = {
+                        Name: 'name',
+                        Value: name
+                    };
+                    
+                    const dataWeight = {
+                        Name: 'custom:weight',
+                        Value: weight
+                    };
+                    
+                    const dataHeight = {
+                        Name: 'custom:height',
+                        Value: height
+                    };
+                    
+                    const dataCalorieGoal = {
+                        Name: 'custom:calorieGoal',
+                        Value: calorieGoal
+                    };
+                    
+                    const attributeName = new AmazonCognitoIdentity.CognitoUserAttribute(dataName);
+                    const attributeWeight = new AmazonCognitoIdentity.CognitoUserAttribute(dataWeight);
+                    const attributeHeight = new AmazonCognitoIdentity.CognitoUserAttribute(dataHeight);
+                    const attributeCalorieGoal = new AmazonCognitoIdentity.CognitoUserAttribute(dataCalorieGoal);
+                    
+                    attributeList.push(attributeName);
+                    attributeList.push(attributeWeight);
+                    attributeList.push(attributeHeight);
+                    attributeList.push(attributeCalorieGoal);
+                    
+                    // Register user
+                    userPool.signUp(email, password, attributeList, null, function(err, result) {
+                        if (err) {
+                            console.error('Error registering user:', err);
+                            alert('Error: ' + err.message || 'Registration failed');
+                            return;
+                        }
+                        
+                        console.log('Registration successful');
+                        
+                        // Store user data in DynamoDB
+                        const dynamodb = new AWS.DynamoDB.DocumentClient();
+                        
+                        const userData = {
+                            userId: result.userSub,
+                            name: name,
+                            email: email,
+                            weight: weight,
+                            height: height,
+                            calorieGoal: calorieGoal
+                        };
+                        
+                        const params = {
+                            TableName: DYNAMODB_TABLE,
+                            Item: userData
+                        };
+                        
+                        dynamodb.put(params, function(err, data) {
+                            if (err) {
+                                console.error('Error saving to DynamoDB:', err);
+                            } else {
+                                console.log('User data saved to DynamoDB');
+                            }
+                            
+                            // Redirect to verification page
+                            alert('Registration successful! Please check your email for verification code.');
+                            window.location.href = 'cognito-verify.html?email=' + encodeURIComponent(email);
+                        });
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

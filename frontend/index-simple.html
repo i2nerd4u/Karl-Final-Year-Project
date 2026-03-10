@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMate Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">MealMate</div>
+        <div class="auth-buttons">
+            <span id="userWelcome"></span>
+            <button onclick="logout()" class="btn">Logout</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <h1>Welcome to MealMate!</h1>
+        <div id="userInfo"></div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+        if (!isLoggedIn || !currentUser.email) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userWelcome').textContent = `Hello, ${currentUser.name}!`;
+            document.getElementById('userInfo').innerHTML = `
+                <p>Email: ${currentUser.email}</p>
+                <p>Weight: ${currentUser.weight} kg</p>
+                <p>Height: ${currentUser.height} cm</p>
+                <p>Calorie Goal: ${currentUser.calorieGoal} cal</p>
+            `;
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

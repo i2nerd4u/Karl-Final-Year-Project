@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMate - Cognito Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .auth-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .auth-divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .auth-divider:before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #ddd;
+        }
+        
+        .auth-divider span {
+            background-color: white;
+            padding: 0 10px;
+            position: relative;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">MealMate</a>
+    </header>
+
+    <main class="main-content">
+        <div class="auth-container">
+            <h1>Login with Cognito</h1>
+            
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username or Email</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            <div class="auth-links">
+                <a href="#">Need an account? Register</a>
+                <a href="#">Forgot password?</a>
+            </div>
+            
+            <div class="auth-divider">
+                <span>or</span>
+            </div>
+            
+            <a href="login.html" class="btn btn-secondary">Standard Login</a>
+        </div>
+    </main>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.10/amazon-cognito-identity.min.js"></script>
+    <script src="aws-config.js"></script>
+    <script src="cognito-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // Clear any previous error
+                errorMessage.style.display = 'none';
+                errorMessage.textContent = '';
+                
+                // Show loading state
+                const submitButton = loginForm.querySelector('button[type="submit"]');
+                const originalText = submitButton.textContent;
+                submitButton.textContent = 'Logging in...';
+                submitButton.disabled = true;
+                
+                // Attempt to sign in
+                signIn(username, password)
+                    .then(() => {
+                        // Redirect to home page on success
+                        window.location.href = 'index.html';
+                    })
+                    .catch(err => {
+                        // Display error message
+                        errorMessage.textContent = err.message || 'Login failed. Please check your credentials.';
+                        errorMessage.style.display = 'block';
+                        
+                        // Reset button
+                        submitButton.textContent = originalText;
+                        submitButton.disabled = false;
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

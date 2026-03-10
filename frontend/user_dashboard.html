@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MealMate</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 80px;
+            margin: 0;
+        }
+        
+        .header {
+            background: #5ba168;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        
+        .main-content {
+            flex: 1 0 auto;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            background: white;
+            color: #5ba168;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .uploaded-images {
+            margin-top: 30px;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            background-color: #f8f9fa;
+            padding: 10px;
+        }
+        
+        .image-info {
+            padding: 10px;
+        }
+        
+        .image-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .image-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .no-images {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div style="display: flex; align-items: center;">
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+            <a href="index.html" style="text-decoration: none; color: white; font-size: 0.8rem; margin-left: 10px; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 4px;">Home</a>
+        </div>
+        <div class="auth-buttons">
+            <span id="welcomeUser" style="margin-right: 15px; font-weight: bold;"></span>
+            <a href="nutrition-analysis.html" class="btn" style="background: #2c3e50; color: white; margin-right: 10px; display: flex; align-items: center; justify-content: center;">AI Tracker</a>
+            <a href="view_data.html" class="btn" style="background: #2c3e50; color: white; margin-right: 10px;">View Data</a>
+            <button id="logoutBtn" class="btn" style="background: #e74c3c; color: white;">Logout</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="welcome-section">
+            <h1 class="welcome-title">Welcome back, <span id="userName">User</span>!</h1>
+            <p class="welcome-subtitle">Here's your nutrition summary</p>
+            
+            <!-- Health Info Banner -->
+            <div id="healthInfoBanner" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; display: none;">
+                <p style="margin: 0; font-size: 18px; font-weight: bold;">📊 Tell us about yourself!</p>
+                <p style="margin: 5px 0 0 0; opacity: 0.9;">Input your health information for better nutritional insights - Use the "Edit Profile" button below</p>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2>Your Profile Information</h2>
+                    <button id="editProfileBtn" class="btn" style="background: #2c3e50; color: white; padding: 5px 15px; border: none; border-radius: 4px; cursor: pointer;">Edit Profile</button>
+                </div>
+                
+                <!-- Profile View Mode -->
+                <div id="profileViewMode">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                            <h3 style="color: #2c3e50;">Age</h3>
+                            <p id="userAge" style="color: #7f8c8d;">-</p>
+                        </div>
+                        <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                            <h3 style="color: #2c3e50;">Weight</h3>
+                            <p id="userWeight" style="color: #7f8c8d;">-</p>
+                        </div>
+                        <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                            <h3 style="color: #2c3e50;">Height</h3>
+                            <p id="userHeight" style="color: #7f8c8d;">-</p>
+                        </div>
+                        <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                            <h3 style="color: #2c3e50;">Calorie Goal</h3>
+                            <p id="userCalorieGoal" style="color: #7f8c8d;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- BMI Display Section -->
+                    <div id="bmiDisplay" style="margin-top: 20px; padding: 20px; background: #27ae60; border-radius: 10px; color: white; text-align: center; display: none;">
+                        <h3 style="margin: 0 0 15px 0;">📊 Your BMI</h3>
+                        <div style="font-size: 2rem; font-weight: bold;" id="bmiValue">-</div>
+                        <div style="font-size: 1.1rem; margin-top: 5px;" id="bmiCategory">-</div>
+                    </div>
+                </div>
+                
+                <!-- Profile Edit Mode -->
+                <div id="profileEditMode" style="display: none;">
+                    <form id="profileForm">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                <label for="fullName" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                            </div>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                <label for="age" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Age</label>
+                                <input type="number" id="age" name="age" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                            </div>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                <label for="weight" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Weight (kg)</label>
+                                <input type="number" id="weight" name="weight" step="0.1" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                            </div>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                <label for="height" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Height (cm)</label>
+                                <input type="number" id="height" name="height" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                            </div>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                <label for="calorieGoal" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Calorie Goal</label>
+                                <input type="number" id="calorieGoal" name="calorieGoal" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                            </div>
+                        </div>
+                        <!-- BMI Calculator 
+                        <div style="margin-top: 30px; padding: 20px; background: #ecf0f1; border-radius: 8px; border-left: 4px solid #2c3e50;">
+                            <h3 style="margin-top: 0; color: #2c3e50; display: flex; align-items: center;">📊 BMI Calculator</h3>
+                            <div id="bmiResult" style="display: none; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px;" id="bmiValue"></div>
+                                <div style="font-size: 1rem;" id="bmiCategory"></div>
+                            </div>
+                            <button type="button" id="calculateBMI" style="background: #2c3e50; color: white; border: none; border-radius: 4px; padding: 8px 15px; cursor: pointer; width: 100%; margin-bottom: 15px;">Calculate BMI</button>
+                        </div>
+                        -->
+                        
+                        <div style="margin-top: 20px; text-align: right;">
+                            <button type="button" id="cancelEditBtn" style="background: #e74c3c; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">Cancel</button>
+                            <button type="submit" style="background: #2c3e50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        
+        <section class="uploaded-images">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                    <h2 style="text-align: center;">Your Uploaded Food Labels</h2>
+                    <p style="text-align: center;">Click on any image to view it in full size</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <a href="index.html" class="btn" style="background: #2c3e50; color: white; display: inline-block;">Upload New Image</a>
+                        <div>
+                            <button id="viewDynamoBtn" class="btn" style="background: #2c3e50; color: white;">View DynamoDB Data</button>
+                            <button id="clearAllDataBtn" class="btn" style="background: #e67e22; color: white; margin-right: 10px;">Clear All Data</button>
+                            <button id="deleteAllBtn" class="btn" style="background: #e74c3c; color: white; margin-right: 10px;">Delete All Images</button>
+                        </div>
+                    </div>
+                    <div id="imageGrid" class="image-grid">
+                        <div class="no-images" style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
+                        <p>No food labels uploaded yet. Go to the home page to upload some!</p>
+                        <a href="index.html" class="btn" style="background: #2c3e50; color: white; margin-top: 15px; display: inline-block;">Upload Food Labels</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DynamoDB Data Modal -->
+            <div id="dynamoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000;">
+                <div style="position: relative; width: 80%; max-width: 800px; margin: 50px auto; background-color: white; padding: 20px; border-radius: 8px; max-height: 80vh; overflow-y: auto;">
+                    <button id="closeModalBtn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer;">×</button>
+                    <h2>DynamoDB Data</h2>
+                    <pre id="dynamoData" style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap;"></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Weekly Meal Planner Section -->
+    <section style="background: #2c3e50; color: white; padding: 1rem; text-align: center;">
+        <p style="margin-bottom: 0.75rem; opacity: 0.9; font-size: 0.9rem;">Plan your week with our meal planner</p>
+        <a href="meal-planner.html" class="btn" style="background: white; color: #2c3e50; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-weight: 500; display: inline-block; font-size: 0.9rem;">Weekly Meal Planner</a>
+    </section>
+
+    <footer style="background: #5ba168; color: white; padding: 1rem; text-align: center; margin-top: auto;">
+        <p>&copy; 2024 MealMate - Your Personal Nutrition Tracker</p>
+    </footer>
+
+    <script src="aws-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userDataString = localStorage.getItem('userData');
+            const idToken = localStorage.getItem('id_token');
+            
+            if (!isLoggedIn && !idToken) {
+                // Redirect to login page if not logged in
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            let userId = null;
+            let userName = 'User';
+            
+            // Get user data from localStorage
+            if (userDataString) {
+                try {
+                    const userData = JSON.parse(userDataString);
+                    userId = userData.userId;
+                    userName = userData.name || 'User';
+                    
+                    // Update user info
+                    document.getElementById('welcomeUser').textContent = `Hello, ${userName}`;
+                    document.getElementById('userName').textContent = userName;
+                    document.getElementById('userAge').textContent = userData.age || '-';
+                    document.getElementById('userWeight').textContent = `${userData.weight || '-'} kg`;
+                    document.getElementById('userHeight').textContent = `${userData.height || '-'} cm`;
+                    document.getElementById('userCalorieGoal').textContent = `${userData.calorieGoal || '-'} cal`;
+                    
+                    // Update BMI display
+                    updateBMI(userData.weight, userData.height);
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            // Or get from Cognito token
+            else if (idToken) {
+                try {
+                    const payload = JSON.parse(atob(idToken.split('.')[1]));
+                    userId = payload.sub;
+                    userName = payload.name || payload.email || 'User';
+                    
+                    // Update user info
+                    document.getElementById('welcomeUser').textContent = `Hello, ${userName}`;
+                    document.getElementById('userName').textContent = userName;
+                } catch (e) {
+                    console.error('Error parsing token:', e);
+                }
+            }
+            
+            // Try API first, fallback to localStorage
+            if (userId && userId !== 'guest') {
+                (async () => {
+                    try {
+                        const response = await fetch(`https://008zc5o3r8.execute-api.eu-north-1.amazonaws.com/prod/user/profile?userId=${userId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        
+                        const profileData = await response.json();
+                        console.log('Profile data from API:', profileData);
+                        // Update display with API data
+                        if (profileData.age) document.getElementById('userAge').textContent = profileData.age;
+                        if (profileData.weight) document.getElementById('userWeight').textContent = `${profileData.weight} kg`;
+                        if (profileData.height) document.getElementById('userHeight').textContent = `${profileData.height} cm`;
+                        if (profileData.calorieGoal) document.getElementById('userCalorieGoal').textContent = `${profileData.calorieGoal} cal`;
+                        updateBMI(profileData.weight, profileData.height);
+                    } catch (err) {
+                        console.log('API failed, using localStorage:', err);
+                        // Show banner if no profile data
+                        const banner = document.getElementById('healthInfoBanner');
+                        if (banner) banner.style.display = 'block';
+                    }
+                })();
+            } else {
+                // Show banner for guest users
+                const banner = document.getElementById('healthInfoBanner');
+                if (banner) banner.style.display = 'block';
+            }
+            
+            // Load user's images from S3
+            loadUserImagesFromS3(userId);
+            
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userData');
+                localStorage.removeItem('id_token');
+                localStorage.removeItem('access_token');
+                window.location.href = 'index.html';
+            });
+            
+            // Profile editing functionality
+            document.getElementById('editProfileBtn').addEventListener('click', function() {
+                document.getElementById('profileViewMode').style.display = 'none';
+                document.getElementById('profileEditMode').style.display = 'block';
+                
+                // Populate form with current values
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                document.getElementById('fullName').value = userData.name || '';
+                document.getElementById('age').value = userData.age || '';
+                document.getElementById('weight').value = userData.weight || '';
+                document.getElementById('height').value = userData.height || '';
+                document.getElementById('calorieGoal').value = userData.calorieGoal || '';
+            });
+            
+            document.getElementById('cancelEditBtn').addEventListener('click', function() {
+                document.getElementById('profileViewMode').style.display = 'block';
+                document.getElementById('profileEditMode').style.display = 'none';
+            });
+            
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get existing user data
+                const existingData = JSON.parse(localStorage.getItem('userData') || '{}');
+                
+                // Update with form values
+                const updatedData = {
+                    ...existingData,
+                    name: document.getElementById('fullName').value,
+                    age: document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
+                    weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
+                    height: document.getElementById('height').value ? parseInt(document.getElementById('height').value) : null,
+                    calorieGoal: document.getElementById('calorieGoal').value ? parseInt(document.getElementById('calorieGoal').value) : null
+                };
+                
+                // Update DynamoDB via API
+                try {
+                    const response = await fetch(`https://008zc5o3r8.execute-api.eu-north-1.amazonaws.com/prod/user/profile`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: userId,
+                            ...updatedData
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Profile updated in DynamoDB via API');
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    console.log('API update failed, saving locally:', error);
+                }
+                
+                // Always save to localStorage and update display
+                localStorage.setItem('userData', JSON.stringify(updatedData));
+                
+                // Update display
+                document.getElementById('userName').textContent = updatedData.name || 'User';
+                document.getElementById('welcomeUser').textContent = `Hello, ${updatedData.name || 'User'}`;
+                document.getElementById('userAge').textContent = updatedData.age || '-';
+                document.getElementById('userWeight').textContent = updatedData.weight ? `${updatedData.weight} kg` : '-';
+                document.getElementById('userHeight').textContent = updatedData.height ? `${updatedData.height} cm` : '-';
+                document.getElementById('userCalorieGoal').textContent = updatedData.calorieGoal ? `${updatedData.calorieGoal} cal` : '-';
+                
+                // Update BMI display
+                updateBMI(updatedData.weight, updatedData.height);
+                
+                showSuccessCheckmark();
+                
+                // Switch back to view mode
+                document.getElementById('profileViewMode').style.display = 'block';
+                document.getElementById('profileEditMode').style.display = 'none';
+            });
+            
+            // Clear All Data functionality
+            document.getElementById('clearAllDataBtn').addEventListener('click', function() {
+                if (confirm('⚠️ WARNING: This will clear ALL your data including:\n\n• Profile information (age, weight, height, etc.)\n• All uploaded images\n• AI analysis results\n• Calorie tracking data\n• Water intake data\n• Shopping lists\n• Food entries\n\nYour login information will be preserved.\n\nAre you sure you want to continue?')) {
+                    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                    const userId = userData.userId || 'guest';
+                    
+                    // Preserve login info
+                    const loginInfo = {
+                        isLoggedIn: localStorage.getItem('isLoggedIn'),
+                        userData: {
+                            userId: userData.userId,
+                            email: userData.email,
+                            name: userData.name
+                        },
+                        id_token: localStorage.getItem('id_token'),
+                        access_token: localStorage.getItem('access_token'),
+                        accessToken: localStorage.getItem('accessToken'),
+                        idToken: localStorage.getItem('idToken'),
+                        refreshToken: localStorage.getItem('refreshToken')
+                    };
+                    
+                    // Clear all user-specific data
+                    const keysToRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && (
+                            key.includes(userId) ||
+                            key === 'userImages' ||
+                            key === 'aiAnalysisEntries' ||
+                            key === 'foodEntries' ||
+                            key === 'customFoods' ||
+                            key.startsWith('shoppingList_') ||
+                            key.startsWith('caloriesConsumedToday_') ||
+                            key.startsWith('waterConsumedToday_') ||
+                            key.startsWith('dailyCalorieGoal_') ||
+                            key.startsWith('lastCalorieResetDate_') ||
+                            key.startsWith('nutritionAdjustments_') ||
+                            key.startsWith('userFoodEmojis_')
+                        )) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                    
+                    // Remove all identified keys
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
+                    
+                    // Restore login info with cleared profile
+                    localStorage.setItem('isLoggedIn', loginInfo.isLoggedIn);
+                    localStorage.setItem('userData', JSON.stringify(loginInfo.userData));
+                    if (loginInfo.id_token) localStorage.setItem('id_token', loginInfo.id_token);
+                    if (loginInfo.access_token) localStorage.setItem('access_token', loginInfo.access_token);
+                    if (loginInfo.accessToken) localStorage.setItem('accessToken', loginInfo.accessToken);
+                    if (loginInfo.idToken) localStorage.setItem('idToken', loginInfo.idToken);
+                    if (loginInfo.refreshToken) localStorage.setItem('refreshToken', loginInfo.refreshToken);
+                    
+                    alert('✅ All data cleared successfully! Your login information has been preserved.');
+                    
+                    // Refresh the page to show cleared state
+                    window.location.reload();
+                }
+            });
+            document.getElementById('deleteAllBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete ALL images? This action cannot be undone.')) {
+                    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                    const userId = userData.userId || 'guest';
+                    
+                    // Get all images
+                    let userImages = JSON.parse(localStorage.getItem('userImages') || '[]');
+                    
+                    // Filter out this user's images
+                    userImages = userImages.filter(img => img.userId !== userId);
+                    
+                    // Save back to localStorage
+                    localStorage.setItem('userImages', JSON.stringify(userImages));
+                    
+                    // Also clear AI analysis entries for this user
+                    let aiAnalyses = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
+                    aiAnalyses = aiAnalyses.filter(entry => entry.userId !== userId);
+                    localStorage.setItem('aiAnalysisEntries', JSON.stringify(aiAnalyses));
+                    
+                    // Refresh the display
+                    loadUserImagesFromS3(userId);
+                    
+                    alert('All images deleted successfully!');
+                }
+            });
+            
+            // View DynamoDB Data functionality
+            document.getElementById('viewDynamoBtn').addEventListener('click', function() {
+                const modal = document.getElementById('dynamoModal');
+                const dataContainer = document.getElementById('dynamoData');
+                
+                // Get all data from localStorage
+                const allData = {
+                    userData: JSON.parse(localStorage.getItem('userData') || '{}'),
+                    userImages: JSON.parse(localStorage.getItem('userImages') || '[]'),
+                    isLoggedIn: localStorage.getItem('isLoggedIn')
+                };
+                
+                // Display the data
+                dataContainer.textContent = JSON.stringify(allData, null, 2);
+                modal.style.display = 'block';
+            });
+            
+            // Close modal functionality
+            document.getElementById('closeModalBtn').addEventListener('click', function() {
+                document.getElementById('dynamoModal').style.display = 'none';
+            });
+            
+            // BMI Calculator functionality
+            const calculateBMIBtn = document.getElementById('calculateBMI');
+            if (calculateBMIBtn) {
+                calculateBMIBtn.addEventListener('click', function() {
+                const weight = parseFloat(document.getElementById('weight').value);
+                const height = parseFloat(document.getElementById('height').value);
+                
+                if (!weight || !height) {
+                    alert('Please enter both weight and height to calculate BMI');
+                    return;
+                }
+                
+                // Calculate BMI (weight in kg, height in cm)
+                const heightInMeters = height / 100;
+                const bmi = weight / (heightInMeters * heightInMeters);
+                
+                // Determine BMI category
+                let category, color;
+                if (bmi < 18.5) {
+                    category = 'Underweight';
+                    color = '#3498db';
+                } else if (bmi < 25) {
+                    category = 'Normal weight';
+                    color = '#2ecc71';
+                } else if (bmi < 30) {
+                    category = 'Overweight';
+                    color = '#f39c12';
+                } else {
+                    category = 'Obese';
+                    color = '#e74c3c';
+                }
+                //testing my branch
+                // Display result
+                const bmiResult = document.getElementById('bmiResult');
+                const bmiValue = document.getElementById('bmiValue');
+                const bmiCategory = document.getElementById('bmiCategory');
+                
+                bmiValue.textContent = `BMI: ${bmi.toFixed(1)}`;
+                bmiCategory.textContent = category;
+                bmiResult.style.backgroundColor = color + '20';
+                bmiResult.style.border = `2px solid ${color}`;
+                bmiResult.style.color = color;
+                bmiResult.style.display = 'block';
+                });
+            }
+        });
+        
+        function loadUserImagesFromS3(userId) {
+            const localImages = JSON.parse(localStorage.getItem('userImages') || '[]');
+            const userLocalImages = localImages.filter(img => img.userId === userId);
+            const imageGrid = document.getElementById('imageGrid');
+            
+            if (userLocalImages.length > 0) {
+                imageGrid.innerHTML = '';
+                userLocalImages.forEach((image, index) => {
+                    addImageToGrid(image, index);
+                });
+            } else {
+                imageGrid.innerHTML = `
+                    <div class="no-images">
+                        <p>No food labels uploaded yet. Go to the home page to upload some!</p>
+                        <a href="index.html" class="btn" style="background: #3498db; color: white; margin-top: 15px; display: inline-block;">Upload Food Labels</a>
+                    </div>
+                `;
+            }
+        }
+        
+        function addImageToGrid(image, index) {
+            const imageGrid = document.getElementById('imageGrid');
+            
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.dataset.imageId = image.imageId || index;
+            
+            // Create image element
+            const img = document.createElement('img');
+            
+            // Use localStorage image data for display
+            if (image.imageData && image.imageData.startsWith('data:')) {
+                img.src = image.imageData;
+            } else if (image.imageUrl) {
+                img.src = image.imageUrl;
+            } else {
+                img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlPC90ZXh0Pjwvc3ZnPg==';
+            }
+            
+            img.alt = image.filename || 'Food Label Image';
+            
+            // Make image clickable to show full size
+            img.style.cursor = 'pointer';
+            img.onclick = function() {
+                showFullSizeImage(image);
+            };
+            
+            const info = document.createElement('div');
+            info.className = 'image-info';
+            
+            const title = document.createElement('h4');
+            title.textContent = image.filename || 'Uploaded Image';
+            
+            const date = document.createElement('p');
+            date.textContent = image.uploadDate ? new Date(image.uploadDate).toLocaleDateString() : 'Unknown date';
+            
+            const size = document.createElement('p');
+            size.textContent = formatFileSize(image.filesize || image.fileSize || 0);
+            
+            // Add delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.style.backgroundColor = '#e74c3c';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.borderRadius = '3px';
+            deleteBtn.style.padding = '3px 8px';
+            deleteBtn.style.marginTop = '5px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.fontSize = '12px';
+            
+            deleteBtn.onclick = function(e) {
+                e.stopPropagation(); // Prevent opening the full image
+                deleteImage(image.imageId || index);
+            };
+            
+            info.appendChild(title);
+            info.appendChild(date);
+            info.appendChild(size);
+            info.appendChild(deleteBtn);
+            
+            card.appendChild(img);
+            card.appendChild(info);
+            
+            imageGrid.appendChild(card);
+        }
+        
+        function deleteImage(imageIdOrIndex) {
+            if (confirm('Are you sure you want to delete this image?')) {
+                // Get images from localStorage
+                const userImages = JSON.parse(localStorage.getItem('userImages') || '[]');
+                
+                // Find the image index
+                const index = typeof imageIdOrIndex === 'number' ? 
+                    imageIdOrIndex : 
+                    userImages.findIndex(img => img.imageId === imageIdOrIndex);
+                
+                if (index !== -1) {
+                    // Remove the image
+                    userImages.splice(index, 1);
+                    
+                    // Save back to localStorage
+                    localStorage.setItem('userImages', JSON.stringify(userImages));
+                    
+                    // Refresh the grid
+                    const imageGrid = document.getElementById('imageGrid');
+                    imageGrid.innerHTML = '';
+                    
+                    if (userImages.length > 0) {
+                        userImages.forEach((image, idx) => addImageToGrid(image, idx));
+                    } else {
+                        imageGrid.innerHTML = `
+                            <div class="no-images">
+                                <p>No food labels uploaded yet. Go to the home page to upload some!</p>
+                                <a href="index.html" class="btn" style="background: #2c3e50; color: white; margin-top: 15px; display: inline-block;">Upload Food Labels</a>
+                            </div>
+                        `;
+                    }
+                    
+                    alert('Image deleted successfully');
+                }
+            }
+        }
+        
+        function showFullSizeImage(image) {
+            // Create modal overlay
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '1000';
+            overlay.style.cursor = 'pointer';
+            
+            // Create image element
+            const img = document.createElement('img');
+            
+            // Handle different image data formats
+            if (image.imageData && image.imageData.startsWith('data:')) {
+                // It's already a data URL
+                img.src = image.imageData;
+            } else if (image.imageUrl) {
+                // It's a URL to an S3 image
+                img.src = image.imageUrl;
+            } else if (image.imageData) {
+                // It's a base64 string without the data URL prefix
+                img.src = `data:${image.fileType || 'image/jpeg'};base64,${image.imageData}`;
+            } else {
+                // Fallback to a placeholder
+                img.src = 'https://via.placeholder.com/800x600?text=Image+Not+Available';
+            }
+            
+            img.style.maxWidth = '90%';
+            img.style.maxHeight = '90%';
+            img.style.objectFit = 'contain';
+            img.style.border = '2px solid white';
+            img.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+            
+            // Close on click
+            overlay.onclick = function() {
+                document.body.removeChild(overlay);
+            };
+            
+            overlay.appendChild(img);
+            document.body.appendChild(overlay);
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        function showSuccessCheckmark() {
+            const container = document.createElement('div');
+            container.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+                z-index: 9999;
+                animation: checkmarkPop 0.6s ease-out;
+            `;
+            
+            const checkmark = document.createElement('div');
+            checkmark.innerHTML = '✓';
+            checkmark.style.cssText = `
+                font-size: 80px;
+                color: #2ecc71;
+                background: white;
+                border-radius: 50%;
+                width: 120px;
+                height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 30px rgba(46, 204, 113, 0.5);
+                margin: 0 auto 15px;
+            `;
+            
+            const text = document.createElement('div');
+            text.textContent = 'User Profile Updated';
+            text.style.cssText = `
+                color: #2ecc71;
+                font-size: 18px;
+                font-weight: bold;
+            `;
+            
+            container.appendChild(checkmark);
+            container.appendChild(text);
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes checkmarkPop {
+                    0% { transform: translate(-50%, -50%) scale(0); }
+                    50% { transform: translate(-50%, -50%) scale(1.2); }
+                    100% { transform: translate(-50%, -50%) scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(container);
+            
+            setTimeout(() => {
+                document.body.removeChild(container);
+                document.head.removeChild(style);
+            }, 2000);
+        }
+        
+        function updateBMI(weight, height) {
+            const bmiDisplay = document.getElementById('bmiDisplay');
+            const bmiValue = document.getElementById('bmiValue');
+            const bmiCategory = document.getElementById('bmiCategory');
+            
+            if (!weight || !height) {
+                bmiDisplay.style.display = 'none';
+                return;
+            }
+            
+            const bmi = weight / ((height / 100) ** 2);
+            let category, color;
+            
+            if (bmi < 18.5) {
+                category = 'Underweight';
+                color = 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)';
+            } else if (bmi < 25) {
+                category = 'Normal Weight';
+                color = 'linear-gradient(135deg, #00e676 0%, #00c853 100%)';
+            } else if (bmi < 30) {
+                category = 'Overweight';
+                color = 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)';
+            } else {
+                category = 'Obese';
+                color = 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)';
+            }
+            
+            bmiValue.textContent = bmi.toFixed(1);
+            bmiCategory.textContent = category;
+            bmiDisplay.style.background = color;
+            bmiDisplay.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

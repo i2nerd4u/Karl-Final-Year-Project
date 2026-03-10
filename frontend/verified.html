@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMate - Registration Successful</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+        <div class="auth-buttons">
+            <a href="index.html" class="btn">Home</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; margin: 2rem 0;">
+            <div style="font-size: 4rem; color: #2ecc71; margin-bottom: 1rem;">✓</div>
+            <h1>Registration Successful!</h1>
+            <p>Your account has been created and your data has been saved.</p>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 5px; text-align: left;">
+                <h2>Your Information</h2>
+                <p><strong>Name:</strong> <span id="userName">-</span></p>
+                <p><strong>Email:</strong> <span id="userEmail">-</span></p>
+                <p><strong>Weight:</strong> <span id="userWeight">-</span> kg</p>
+                <p><strong>Height:</strong> <span id="userHeight">-</span> cm</p>
+                <p><strong>Calorie Goal:</strong> <span id="userCalorieGoal">-</span> cal</p>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <a href="index.html" class="btn" style="background: #5a6b5d; color: white; margin-right: 10px;">Go to Homepage</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get user data from localStorage
+            const userDataString = localStorage.getItem('userData');
+            
+            if (userDataString) {
+                try {
+                    const userData = JSON.parse(userDataString);
+                    
+                    // Update user info
+                    document.getElementById('userName').textContent = userData.name || '-';
+                    document.getElementById('userEmail').textContent = userData.email || '-';
+                    document.getElementById('userWeight').textContent = userData.weight || '-';
+                    document.getElementById('userHeight').textContent = userData.height || '-';
+                    document.getElementById('userCalorieGoal').textContent = userData.calorieGoal || '-';
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

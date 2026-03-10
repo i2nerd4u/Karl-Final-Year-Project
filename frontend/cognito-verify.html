@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - MealMate</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.10/amazon-cognito-identity.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+    </header>
+
+    <div class="main-container">
+        <div class="form-section">
+            <div class="form-container">
+                <h1 class="form-title">Verify Your Email</h1>
+                <p class="form-subtitle">Please enter the verification code sent to your email</p>
+                <form class="login-form" id="verificationForm">
+                    <div class="form-group">
+                        <label for="code">Verification Code</label>
+                        <input type="text" id="code" required>
+                    </div>
+                    <button type="submit" class="login-btn">Verify Email</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="image-section">
+            <div class="background-decoration"></div>
+            <div class="image-container">
+                <div class="fruit-images">
+                    <div class="fruit-row">
+                        <div class="floating-fruit">🍐</div>
+                        <div class="floating-fruit">🍎</div>
+                        <div class="floating-fruit">🍞</div>
+                        <div class="floating-fruit">🍗</div>
+                    </div>
+                </div>
+                <h2 class="image-title">Almost there!</h2>
+                <p class="image-description">Just one more step to start your health journey</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+
+    <script src="aws-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get email from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            
+            if (!email) {
+                alert('Email parameter is missing');
+                window.location.href = 'cognito-register.html';
+                return;
+            }
+            
+            const verificationForm = document.getElementById('verificationForm');
+            
+            if (verificationForm) {
+                verificationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const code = document.getElementById('code').value;
+                    
+                    // Initialize Cognito user pool
+                    const poolData = {
+                        UserPoolId: cognitoConfig.UserPoolId,
+                        ClientId: cognitoConfig.ClientId
+                    };
+                    
+                    const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+                    
+                    const userData = {
+                        Username: email,
+                        Pool: userPool
+                    };
+                    
+                    const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+                    
+                    // Confirm registration
+                    cognitoUser.confirmRegistration(code, true, function(err, result) {
+                        if (err) {
+                            console.error('Error confirming registration:', err);
+                            alert('Error: ' + err.message || 'Verification failed');
+                            return;
+                        }
+                        
+                        console.log('Verification successful');
+                        alert('Email verified successfully! You can now log in.');
+                        window.location.href = 'cognito-login.html';
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMate - Nutrition Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @keyframes floatAround {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(50px, -40px) rotate(45deg);
+            }
+            50% {
+                transform: translate(20px, 60px) rotate(90deg);
+            }
+            75% {
+                transform: translate(-40px, 30px) rotate(45deg);
+            }
+        }
+        
+        .drop-area {
+            margin-top: 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            width: 100%;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .drop-area.highlight {
+            border-color: #3498db;
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Fix localStorage to be user-specific
+        function makeDataUserSpecific() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const userId = userData.userId;
+            
+            if (!userId) return;
+            
+            // Fix custom foods
+            const customFoods = JSON.parse(localStorage.getItem('customFoods') || '[]');
+            if (customFoods.length > 0) {
+                localStorage.setItem(`customFoods_${userId}`, JSON.stringify(customFoods));
+                localStorage.removeItem('customFoods');
+            }
+            
+            // Filter all data to current user only
+            const aiAnalyses = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
+            const userAnalyses = aiAnalyses.filter(entry => !entry.userId || entry.userId === userId);
+            localStorage.setItem('aiAnalysisEntries', JSON.stringify(userAnalyses));
+            
+            const userImages = JSON.parse(localStorage.getItem('userImages') || '[]');
+            const filteredImages = userImages.filter(img => img.userId === userId);
+            localStorage.setItem('userImages', JSON.stringify(filteredImages));
+            
+            const foodEntries = JSON.parse(localStorage.getItem('foodEntries') || '[]');
+            const userFoodEntries = foodEntries.filter(entry => entry.userId === userId);
+            localStorage.setItem('foodEntries', JSON.stringify(userFoodEntries));
+        }
+        
+        // Run data fix on load
+        if (localStorage.getItem('userData')) {
+            makeDataUserSpecific();
+        }
+        
+        // Redirect to main index
+        window.location.href = 'index.html';
+    </script>
+</body>
+</html>

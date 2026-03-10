@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMate - User Profile</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.10/amazon-cognito-identity.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background: #f9f9f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #5ba168;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-signout {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        .profile-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-right: 2rem;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-form {
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-save {
+            background: #3498db;
+            color: white;
+            margin-top: 1rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #5ba168;
+            color: white;
+            margin-top: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: white; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+        <div class="user-profile">
+            <span class="user-name" id="headerUserName" style="color: white;">User Name</span>
+           
+            <button class="btn btn-signout" id="signOutBtn">Sign Out</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="profile-section">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileInitial">U</div>
+                <div class="profile-info">
+                    <h1 id="profileName">User Name</h1>
+                    <p id="profileEmail">user@example.com</p>
+                </div>
+            </div>
+
+            <div class="profile-form">
+                <h2>Personal Information</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age">
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="weight" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" name="height">
+                    </div>
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+
+    <script src="aws-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to get user info from different sources
+            const idToken = localStorage.getItem('id_token');
+            const userDataString = localStorage.getItem('userData');
+            
+            // Default user info
+            let userName = 'Demo User';
+            let userEmail = 'demo@example.com';
+            let userWeight = '';
+            let userHeight = '';
+            let userAge = '';
+            
+            // Check for user data in localStorage
+            if (userDataString) {
+                try {
+                    const userData = JSON.parse(userDataString);
+                    userName = userData.name || 'Demo User';
+                    userEmail = userData.email || 'demo@example.com';
+                    userWeight = userData.weight || '';
+                    userHeight = userData.height || '';
+                    userAge = userData.age || '';
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            // Or check for Cognito token
+            else if (idToken) {
+                try {
+                    // Parse the JWT token
+                    const payload = JSON.parse(atob(idToken.split('.')[1]));
+                    
+                    // Use token info if available
+                    userName = payload.name || payload.email || 'Demo User';
+                    userEmail = payload.email || 'demo@example.com';
+                } catch (e) {
+                    console.error('Error processing token:', e);
+                }
+            }
+            
+            // Display user info
+            document.getElementById('headerUserName').textContent = userName;
+            document.getElementById('profileName').textContent = userName;
+            document.getElementById('profileEmail').textContent = userEmail;
+            document.getElementById('fullName').value = userName;
+            document.getElementById('email').value = userEmail;
+            document.getElementById('weight').value = userWeight;
+            document.getElementById('height').value = userHeight;
+            document.getElementById('age').value = userAge;
+            
+            // Set profile initial
+            if (userName && userName.length > 0) {
+                document.getElementById('profileInitial').textContent = userName.charAt(0).toUpperCase();
+            }
+        });
+
+        // Sign out functionality
+        document.getElementById('signOutBtn').addEventListener('click', function() {
+            // Clear stored data
+            localStorage.removeItem('id_token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('isLoggedIn');
+            
+            // Redirect to index page
+            window.location.href = 'index.html';
+        });
+        
+        // Handle form submission
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get existing data and merge with form data
+            const existingData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const userData = {
+                ...existingData, // Preserve all existing fields
+                name: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                weight: document.getElementById('weight').value,
+                height: document.getElementById('height').value,
+                age: document.getElementById('age').value
+            };
+            
+            // Update localStorage
+            localStorage.setItem('userData', JSON.stringify(userData));
+            
+            // If we have DynamoDB configured, update there too
+            if (typeof AWS !== 'undefined' && typeof DYNAMODB_TABLE !== 'undefined') {
+                const dynamodb = new AWS.DynamoDB.DocumentClient();
+                
+                // Ensure userId exists (already preserved from merge above)
+                if (!userData.userId) {
+                    userData.userId = 'user_' + Date.now();
+                }
+                
+                // Update DynamoDB
+                const params = {
+                    TableName: DYNAMODB_TABLE,
+                    Item: userData
+                };
+                
+                dynamodb.put(params, function(err, data) {
+                    if (err) {
+                        console.error("Error updating profile in DynamoDB:", err);
+                    } else {
+                        console.log("Profile updated in DynamoDB");
+                    }
+                    
+                    // Show success message
+                    alert('Profile updated successfully!');
+                });
+            } else {
+                // Just show success message if no DynamoDB
+                alert('Profile updated successfully!');
+            }
+        });
+    </script>
+
+</body>
+</html>

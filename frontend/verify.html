@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - MealMate</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="javascript" href="script.js">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.1/dist/amazon-cognito-identity.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+    </header>
+
+    <div class="main-container">
+        <div class="form-section">
+            <div class="form-container">
+                <h1 class="form-title">Verify Your Email</h1>
+                <p class="form-subtitle">Please enter the verification code sent to your email</p>
+                <form id="verificationForm" class="verify-form">
+                    <div class="form-group">
+                        <label for="code">Verification Code</label>
+                        <input type="text" id="code" required>
+                    </div>
+                    <button type="submit" class="verify-btn">Verify Email</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="image-section">
+            <div class="background-decoration"></div>
+            <div class="image-container">
+                <div class="fruit-images">
+                    <div class="fruit-row">
+                        <div class="floating-fruit">🍐</div>
+                        <div class="floating-fruit">🍎</div>
+                        <div class="floating-fruit">🍞</div>
+                        <div class="floating-fruit">🍗</div>
+                    </div>
+                </div>
+                <h2 class="image-title">Almost there!</h2>
+                <p class="image-description">Just one more step to start your health journey</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+
+    <script>
+    const poolData = {
+        UserPoolId: 'us-east-1_oAOmljHdf',
+        ClientId: '5llflsvkajtph9u24av508moe2'
+    };
+
+    document.getElementById('verificationForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const code = document.getElementById('code').value;
+        const userEmail = sessionStorage.getItem('userEmail');
+        
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        const userData = {
+            Username: userEmail,
+            Pool: userPool
+        };
+
+        const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+
+        cognitoUser.confirmRegistration(code, true, (err, result) => {
+            if (err) {
+                alert(err.message);
+                return;
+            }
+            alert('Email verified successfully!');
+            window.location.href = 'profile-setup.html';
+        });
+    });
+    </script>
+</body>
+</html>

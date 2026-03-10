@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMate - Add User</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .submit-btn {
+            background-color: #5ba168;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            background-color: #4a5a4d;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+        <div class="auth-buttons">
+            <a href="index.html" class="btn">Home</a>
+            <a href="view_dynamodb.html" class="btn">View Data</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1>Add New User</h1>
+        <p>Enter user information to add to the database</p>
+        
+        <div class="form-container">
+            <h2>User Information</h2>
+            <form id="addUserForm">
+                <div class="form-group">
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter email address">
+                </div>
+                
+                <div class="form-group">
+                    <label for="weight">Weight (kg):</label>
+                    <input type="number" id="weight" name="weight" step="0.1" required placeholder="Enter weight in kg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="height">Height (cm):</label>
+                    <input type="number" id="height" name="height" required placeholder="Enter height in cm">
+                </div>
+                
+                <div class="form-group">
+                    <label for="calorieGoal">Daily Calorie Goal:</label>
+                    <input type="number" id="calorieGoal" name="calorieGoal" required placeholder="Enter daily calorie goal">
+                </div>
+                
+                <button type="submit" class="submit-btn">Add User</button>
+            </form>
+            
+            <div id="statusMessage" class="status"></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+
+    <script>
+        const API_BASE = 'https://rzscchcv11.execute-api.us-east-1.amazonaws.com/Prod';
+        
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.className = isError ? 'status error' : 'status success';
+            statusElement.style.display = 'block';
+            setTimeout(() => statusElement.style.display = 'none', 5000);
+        }
+        
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Generate a unique user ID
+            const userId = 'user_' + Date.now();
+            
+            // Get form data
+            const userData = {
+                userId: userId,
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                weight: document.getElementById('weight').value,
+                height: document.getElementById('height').value,
+                calorieGoal: document.getElementById('calorieGoal').value
+            };
+            
+            // Send data to API
+            fetch(`${API_BASE}/user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showStatus('User added successfully!');
+                document.getElementById('addUserForm').reset();
+            })
+            .catch(error => {
+                console.error('Error adding user:', error);
+                showStatus('Error adding user: ' + error.message, true);
+            });
+        });
+    </script>
+</body>
+</html>

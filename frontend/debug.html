@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug - MealMate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .user-card {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+        .user-card h3 {
+            margin-top: 0;
+        }
+        .login-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MealMate API Debug</h1>
+        <p>Use this page to test API connections and view available users</p>
+        
+        <div>
+            <button id="fetchUsersBtn">Fetch All Users</button>
+            <button id="testCorsBtn">Test CORS</button>
+            <a href="index.html"><button>Back to Home</button></a>
+        </div>
+        
+        <h2>API Response:</h2>
+        <div id="responseContainer">
+            <p>Click a button above to make an API request</p>
+        </div>
+        
+        <h2>Available Users:</h2>
+        <div id="usersContainer">
+            <p>No users fetched yet</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const API_BASE = 'https://rzscchcv11.execute-api.us-east-1.amazonaws.com/Prod';
+            const responseContainer = document.getElementById('responseContainer');
+            const usersContainer = document.getElementById('usersContainer');
+            
+            // Function to display response
+            function displayResponse(data, error = false) {
+                responseContainer.innerHTML = `
+                    <pre style="color: ${error ? 'red' : 'black'}">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            }
+            
+            // Function to display users
+            function displayUsers(users) {
+                if (!users || users.length === 0) {
+                    usersContainer.innerHTML = '<p>No users found</p>';
+                    return;
+                }
+                
+                let html = '';
+                users.forEach(user => {
+                    html += `
+                        <div class="user-card">
+                            <h3>${user.name || 'Unnamed User'}</h3>
+                            <p><strong>Email:</strong> ${user.email || 'No email'}</p>
+                            <p><strong>User ID:</strong> ${user.userId || 'No ID'}</p>
+                            <p><strong>Password:</strong> ${user.passwordHash || 'No password'}</p>
+                            <button class="login-btn" data-email="${user.email}" data-password="${user.passwordHash || ''}">Login as this user</button>
+                        </div>
+                    `;
+                });
+                
+                usersContainer.innerHTML = html;
+                
+                // Add event listeners to login buttons
+                document.querySelectorAll('.login-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const email = this.getAttribute('data-email');
+                        const password = this.getAttribute('data-password');
+                        
+                        // Store credentials in sessionStorage for the login page
+                        sessionStorage.setItem('debug_email', email);
+                        sessionStorage.setItem('debug_password', password);
+                        
+                        // Redirect to login page
+                        window.location.href = 'login.html?debug=1';
+                    });
+                });
+            }
+            
+            // Fetch Users button
+            document.getElementById('fetchUsersBtn').addEventListener('click', function() {
+                this.disabled = true;
+                this.textContent = 'Loading...';
+                
+                fetch(`${API_BASE}/users`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`API error: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        displayResponse(data);
+                        displayUsers(data);
+                        this.textContent = 'Fetch All Users';
+                        this.disabled = false;
+                    })
+                    .catch(error => {
+                        displayResponse({error: error.message}, true);
+                        this.textContent = 'Fetch All Users';
+                        this.disabled = false;
+                    });
+            });
+            
+            // Test CORS button
+            document.getElementById('testCorsBtn').addEventListener('click', function() {
+                this.disabled = true;
+                this.textContent = 'Testing...';
+                
+                fetch(`${API_BASE}/users`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin
+                    }
+                })
+                    .then(response => {
+                        const headers = {};
+                        response.headers.forEach((value, key) => {
+                            headers[key] = value;
+                        });
+                        
+                        displayResponse({
+                            status: response.status,
+                            statusText: response.statusText,
+                            headers: headers,
+                            cors: {
+                                'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                                'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                                'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                            }
+                        });
+                        
+                        this.textContent = 'Test CORS';
+                        this.disabled = false;
+                    })
+                    .catch(error => {
+                        displayResponse({error: error.message}, true);
+                        this.textContent = 'Test CORS';
+                        this.disabled = false;
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

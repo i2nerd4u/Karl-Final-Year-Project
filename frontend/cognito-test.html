@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognito Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-card {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cognito Authentication Test</h1>
+    <p>This page tests the Cognito authentication integration.</p>
+    
+    <div class="test-card">
+        <h2>1. Check Authentication Status</h2>
+        <button onclick="checkAuthStatus()">Check Status</button>
+        <div id="authStatus" class="result"></div>
+    </div>
+    
+    <div class="test-card">
+        <h2>2. Test API Call with Cognito Token</h2>
+        <button onclick="testApiCall()">Test API Call</button>
+        <div id="apiResult" class="result"></div>
+    </div>
+    
+    <div class="test-card">
+        <h2>3. View Token Details</h2>
+        <button onclick="viewTokenDetails()">View Token</button>
+        <div id="tokenDetails" class="result"></div>
+    </div>
+    
+    <div class="test-card">
+        <h2>4. Test AWS Credentials</h2>
+        <button onclick="testAwsCredentials()">Test AWS Credentials</button>
+        <div id="credentialsResult" class="result"></div>
+    </div>
+    
+    <div class="test-card">
+        <h2>Actions</h2>
+        <button onclick="window.location.href='cognito-login.html'">Login</button>
+        <button onclick="logout()" style="background-color: #e74c3c;">Logout</button>
+        <button onclick="window.location.href='index.html'">Back to Home</button>
+    </div>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.10/amazon-cognito-identity.min.js"></script>
+    <script src="aws-config.js"></script>
+    <script src="cognito-auth.js"></script>
+    <script>
+        // Check authentication status
+        function checkAuthStatus() {
+            const statusDiv = document.getElementById('authStatus');
+            statusDiv.innerHTML = '<p>Checking authentication status...</p>';
+            
+            const idToken = localStorage.getItem('id_token');
+            
+            if (!idToken) {
+                statusDiv.innerHTML = '<p>❌ Not authenticated. Please log in.</p>';
+                return;
+            }
+            
+            try {
+                // Parse the token
+                const payload = JSON.parse(atob(idToken.split('.')[1]));
+                const expTime = new Date(payload.exp * 1000);
+                const now = new Date();
+                const isExpired = now > expTime;
+                
+                if (isExpired) {
+                    statusDiv.innerHTML = `
+                        <p>❌ Token expired at ${expTime.toLocaleString()}</p>
+                        <p>Please log in again.</p>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <p>✅ Authenticated as: ${payload.email || payload.username || 'Unknown user'}</p>
+                        <p>Token expires: ${expTime.toLocaleString()}</p>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<p>❌ Error parsing token: ${error.message}</p>`;
+            }
+        }
+        
+        // Test API call with Cognito token
+        function testApiCall() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>Testing API call...</p>';
+            
+            const idToken = localStorage.getItem('id_token');
+            
+            if (!idToken) {
+                resultDiv.innerHTML = '<p>❌ Not authenticated. Please log in first.</p>';
+                return;
+            }
+            
+            // Make an API call with the token
+            fetch(`${apiConfig.apiUrl}/user/me`, {
+                headers: {
+                    'Authorization': idToken
+                }
+            })
+            .then(response => {
+                resultDiv.innerHTML += `<p>Response status: ${response.status} ${response.statusText}</p>`;
+                return response.json().catch(() => ({}));
+            })
+            .then(data => {
+                resultDiv.innerHTML += `
+                    <p>✅ API call successful!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            })
+            .catch(error => {
+                resultDiv.innerHTML += `<p>❌ API call failed: ${error.message}</p>`;
+            });
+        }
+        
+        // View token details
+        function viewTokenDetails() {
+            const detailsDiv = document.getElementById('tokenDetails');
+            detailsDiv.innerHTML = '<p>Getting token details...</p>';
+            
+            const idToken = localStorage.getItem('id_token');
+            
+            if (!idToken) {
+                detailsDiv.innerHTML = '<p>❌ No token found. Please log in first.</p>';
+                return;
+            }
+            
+            try {
+                // Parse the token
+                const payload = JSON.parse(atob(idToken.split('.')[1]));
+                
+                detailsDiv.innerHTML = `
+                    <p>✅ Token details:</p>
+                    <pre>${JSON.stringify(payload, null, 2)}</pre>
+                `;
+            } catch (error) {
+                detailsDiv.innerHTML = `<p>❌ Error parsing token: ${error.message}</p>`;
+            }
+        }
+        
+        // Test AWS credentials
+        function testAwsCredentials() {
+            const resultDiv = document.getElementById('credentialsResult');
+            resultDiv.innerHTML = '<p>Testing AWS credentials...</p>';
+            
+            const idToken = localStorage.getItem('id_token');
+            
+            if (!idToken) {
+                resultDiv.innerHTML = '<p>❌ Not authenticated. Please log in first.</p>';
+                return;
+            }
+            
+            // Set up AWS credentials
+            AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId: cognitoConfig.IdentityPoolId,
+                Logins: {
+                    [`cognito-idp.${cognitoConfig.Region}.amazonaws.com/${cognitoConfig.UserPoolId}`]: idToken
+                }
+            });
+            
+            // Refresh credentials
+            AWS.config.credentials.refresh(error => {
+                if (error) {
+                    resultDiv.innerHTML = `<p>❌ Error refreshing credentials: ${error.message}</p>`;
+                    return;
+                }
+                
+                resultDiv.innerHTML = `
+                    <p>✅ AWS credentials obtained successfully!</p>
+                    <p>Identity ID: ${AWS.config.credentials.identityId}</p>
+                    <p>Credentials will expire: ${new Date(AWS.config.credentials.expireTime).toLocaleString()}</p>
+                `;
+                
+                // Try to use the credentials
+                const s3 = new AWS.S3();
+                s3.listBuckets((err, data) => {
+                    if (err) {
+                        resultDiv.innerHTML += `
+                            <p>❌ Error using credentials: ${err.message}</p>
+                            <p>This is expected if your IAM role doesn't have S3 permissions.</p>
+                        `;
+                    } else {
+                        resultDiv.innerHTML += `
+                            <p>✅ Successfully used credentials to list S3 buckets!</p>
+                            <p>Found ${data.Buckets.length} buckets.</p>
+                        `;
+                    }
+                });
+            });
+        }
+        
+        // Logout function
+        function logout() {
+            if (typeof signOut === 'function') {
+                signOut();
+                alert('Logged out successfully!');
+                window.location.reload();
+            } else {
+                alert('Logout function not available.');
+            }
+        }
+        
+        // Check status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>

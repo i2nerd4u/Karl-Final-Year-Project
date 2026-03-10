@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - MealMate</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none; color: inherit; font-size: 1.5rem; font-weight: bold;">MealMate</a>
+        <div class="auth-buttons">
+            <a href="login.html" class="btn btn-signin">Log In</a>
+            <a href="register_info.html" class="btn btn-register">Register</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="form-section">
+            <div class="form-container">
+                <h1 class="form-title">Sign Up today!</h1>
+                <p class="form-subtitle">We just need some information from you</p>
+                <form class="login-form" id="signupForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="13" max="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight(kg)</label>
+                        <input type="number" id="weight" name="weight" min="1" max="500" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height(cm)</label>
+                        <input type="number" id="height" name="height" min="50" max="300" required>
+                    </div>
+                     <div class="form-group">
+                        <label for="Maintence">Desired Calorie Maintence(cal)</label>
+                        <input type="number" id="Maintence" name="calorieGoal" min="50" max="5000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    <div id="registerStatus" style="text-align: center; margin-top: 10px; display: none; padding: 10px; border-radius: 4px;"></div>
+                    <button type="submit" class="register-btn">Register</button>
+                    <div class="divider">
+                    
+                    </div>
+                    <div class="signup-prompt">Do you already have an account... sign in here</div>
+                    <a href="login.html" class="signup-link">Sign in</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="image-section">
+            <div class="background-decoration"></div>
+            <div class="image-container">
+                <div class="fruit-images">
+                    <div class="fruit-row">
+                        <div class="floating-fruit">🍐</div>
+                        <div class="floating-fruit">🍎</div>
+                        <div class="floating-fruit">🍞 </div>
+                        <div class="floating-fruit">🍗</div>
+                    </div>
+                </div>
+                <div class="image-container"></div>
+                    <h2 class="image-title">Helping you stay on track</h2>
+                    <p class="image-description">
+                        Our app will help you stay on track with our smart scan. Let us do all the complex calculations while you relax
+                    </p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <h4>MacroLense</h4>
+    </footer>
+    
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.10/amazon-cognito-identity.min.js"></script>
+    <script src="aws-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupForm = document.getElementById('signupForm');
+            const registerStatus = document.getElementById('registerStatus');
+            
+            function showStatus(message, isSuccess) {
+                registerStatus.innerHTML = message;
+                registerStatus.style.backgroundColor = isSuccess ? '#e8f5e9' : '#ffebee';
+                registerStatus.style.color = isSuccess ? '#2e7d32' : '#c62828';
+                registerStatus.style.display = 'block';
+            }
+            
+            signupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    showStatus('Passwords do not match!', false);
+                    return;
+                }
+                
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const weight = document.getElementById('weight').value;
+                const height = document.getElementById('height').value;
+                const calorieGoal = document.getElementById('Maintence').value;
+                
+                showStatus('Creating Cognito account...', true);
+                
+                const poolData = {
+                    UserPoolId: cognitoConfig.UserPoolId,
+                    ClientId: cognitoConfig.ClientId
+                };
+                
+                const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+                
+                const attributeList = [];
+                attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name: 'name', Value: name}));
+                attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name: 'custom:weight', Value: weight}));
+                attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name: 'custom:height', Value: height}));
+                attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name: 'custom:calorieGoal', Value: calorieGoal}));
+                
+                userPool.signUp(email, password, attributeList, null, function(err, result) {
+                    if (err) {
+                        showStatus(err.message || 'Registration failed', false);
+                        return;
+                    }
+                    
+                    showStatus('Registration successful! Check email for verification.', true);
+                    setTimeout(() => window.location.href = 'cognito-verify.html?email=' + encodeURIComponent(email), 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

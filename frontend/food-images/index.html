@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Images Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #3498db;
+        }
+        .card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .food-item {
+            text-align: center;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .food-emoji {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Food Images Manager</h1>
+    
+    <div class="card">
+        <h2>How to Use</h2>
+        <p>This tool helps you manage food images for the nutrition database. You can:</p>
+        <ol>
+            <li>Generate placeholder images using emojis</li>
+            <li>Replace any image with your own custom image</li>
+            <li>View all current food items</li>
+        </ol>
+        <a href="generate-images.html" class="btn">Generate Placeholder Images</a>
+    </div>
+    
+    <div class="card">
+        <h2>Current Food Items</h2>
+        <p>These are the food items currently in the database. To replace an image, simply create a PNG file with the same name.</p>
+        
+        <div class="food-grid" id="foodGrid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+    
+    <script>
+        // Load the nutrition database
+        fetch('../nutrition-db.js')
+            .then(response => response.text())
+            .then(text => {
+                // Extract food names and emojis using regex
+                const regex = /(\w+):\s*{[^}]*emoji:\s*'([^']+)'/g;
+                const foodItems = [];
+                let match;
+                
+                while ((match = regex.exec(text)) !== null) {
+                    foodItems.push({
+                        name: match[1],
+                        emoji: match[2]
+                    });
+                }
+                
+                // Populate the grid
+                const foodGrid = document.getElementById('foodGrid');
+                foodItems.forEach(item => {
+                    const foodItem = document.createElement('div');
+                    foodItem.className = 'food-item';
+                    foodItem.innerHTML = `
+                        <div class="food-emoji">${item.emoji}</div>
+                        <div>${item.name}</div>
+                    `;
+                    foodGrid.appendChild(foodItem);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading nutrition database:', error);
+            });
+    </script>
+</body>
+</html>
