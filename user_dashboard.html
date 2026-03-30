@@ -117,6 +117,144 @@
             border-radius: 8px;
             color: #666;
         }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-wrap: nowrap;
+                min-height: 60px;
+                overflow-x: visible;
+            }
+            
+            .header > div:first-child {
+                flex-shrink: 0;
+            }
+            
+            .header > div:first-child a:first-child {
+                font-size: 1.2rem;
+            }
+            
+            .header > div:first-child a:last-child {
+                font-size: 0.7rem;
+                padding: 2px 6px;
+                margin-left: 8px;
+            }
+            
+            .auth-buttons {
+                display: flex;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                align-items: center;
+                flex-shrink: 0;
+                max-width: 60%;
+            }
+            
+            .auth-buttons .btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                min-width: auto;
+                flex-shrink: 0;
+                border-radius: 15px;
+                font-weight: 600;
+            }
+            
+            .auth-buttons span {
+                display: none;
+            }
+            
+            body {
+                padding-top: 70px;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.6rem 0.8rem;
+                flex-direction: column;
+                align-items: stretch;
+                min-height: auto;
+                gap: 0.5rem;
+            }
+            
+            .header > div:first-child {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .header > div:first-child a:first-child {
+                font-size: 1.1rem;
+            }
+            
+            .header > div:first-child a:last-child {
+                font-size: 0.65rem;
+                margin-left: 6px;
+            }
+            
+            .auth-buttons {
+                gap: 0.3rem;
+                justify-content: center;
+                max-width: 100%;
+                flex-wrap: wrap;
+            }
+            
+            .auth-buttons .btn {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.75rem;
+                flex: 1;
+                min-width: 80px;
+                text-align: center;
+            }
+            
+            body {
+                padding-top: 90px;
+            }
+            
+            .main-content {
+                padding: 0.8rem;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .image-card img {
+                height: 120px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .header {
+                padding: 0.5rem;
+            }
+            
+            .header > div:first-child a:first-child {
+                font-size: 1rem;
+            }
+            
+            .auth-buttons .btn {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.7rem;
+                min-width: 70px;
+            }
+            
+            body {
+                padding-top: 100px;
+            }
+        }
     </style>
 </head>
 <body>

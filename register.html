@@ -43,6 +43,207 @@
         .background-decoration { position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background: radial-gradient(circle at 20% 30%, #f1c40f 0%, transparent 50%), radial-gradient(circle at 80% 70%, #e74c3c 0%, transparent 50%), radial-gradient(circle at 40% 80%, #3498db 0%, transparent 50%); }
         .footer { background: #5a6b5d; color: white; padding: 1rem; text-align: center; margin-top: auto; }
         @keyframes floatAround { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(30px, -20px) rotate(90deg); } 50% { transform: translate(-20px, -30px) rotate(180deg); } 75% { transform: translate(-30px, 20px) rotate(270deg); } }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-wrap: nowrap;
+                min-height: 60px;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .auth-buttons {
+                gap: 0.5rem;
+            }
+            
+            .auth-buttons .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            
+            .main-container {
+                grid-template-columns: 1fr;
+                min-height: calc(100vh - 80px);
+            }
+            
+            .form-section {
+                padding: 2rem 1.5rem;
+                order: 1;
+            }
+            
+            .image-section {
+                padding: 2rem 1.5rem;
+                min-height: 300px;
+                order: 2;
+            }
+            
+            .form-title {
+                font-size: 1.8rem;
+            }
+            
+            .form-subtitle {
+                font-size: 1rem;
+            }
+            
+            .login-form {
+                padding: 2rem;
+                border-radius: 20px;
+            }
+            
+            .image-title {
+                font-size: 1.5rem;
+            }
+            
+            .image-description {
+                font-size: 1rem;
+            }
+            
+            .floating-fruit {
+                font-size: 2.5rem;
+            }
+            
+            .fruit-row {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding-top: 70px;
+            }
+            
+            .header {
+                padding: 0.6rem 0.8rem;
+                flex-direction: column;
+                gap: 0.5rem;
+                min-height: auto;
+            }
+            
+            .logo {
+                font-size: 1.1rem;
+            }
+            
+            .auth-buttons {
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .auth-buttons .btn {
+                flex: 1;
+                max-width: 100px;
+                text-align: center;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            
+            .form-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .image-section {
+                padding: 1.5rem 1rem;
+                min-height: 200px;
+            }
+            
+            .form-title {
+                font-size: 1.6rem;
+            }
+            
+            .form-subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .login-form {
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            
+            .form-group input {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+            }
+            
+            .register-btn {
+                padding: 0.9rem;
+                font-size: 1rem;
+            }
+            
+            .image-title {
+                font-size: 1.3rem;
+                margin-bottom: 0.8rem;
+            }
+            
+            .image-description {
+                font-size: 0.9rem;
+                max-width: 250px;
+            }
+            
+            .floating-fruit {
+                font-size: 2rem;
+            }
+            
+            .fruit-row {
+                gap: 0.3rem;
+            }
+            
+            .fruit-images {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .header {
+                padding: 0.5rem;
+            }
+            
+            .logo {
+                font-size: 1rem;
+            }
+            
+            .auth-buttons .btn {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.7rem;
+            }
+            
+            .form-section {
+                padding: 1rem 0.8rem;
+            }
+            
+            .login-form {
+                padding: 1.2rem;
+            }
+            
+            .form-title {
+                font-size: 1.4rem;
+            }
+            
+            .form-group {
+                margin-bottom: 0.8rem;
+            }
+            
+            .form-group input {
+                padding: 0.6rem;
+                font-size: 0.85rem;
+            }
+            
+            .floating-fruit {
+                font-size: 1.5rem;
+            }
+            
+            .image-section {
+                min-height: 150px;
+            }
+        }
     </style>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1001.0.min.js"></script>
 </head>

@@ -696,12 +696,28 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-container {
-        gap: 15px;
+        gap: 10px;
+        padding: 0 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .nav-container::-webkit-scrollbar {
+        display: none;
     }
     
     .nav-link {
-        padding: 8px 15px;
-        font-size: 14px;
+        padding: 8px 12px;
+        font-size: 13px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: auto;
+    }
+    
+    .nav-icon {
+        font-size: 16px;
     }
     
     .goal-stats {
@@ -720,6 +736,15 @@
     .health-form-grid {
         grid-template-columns: 1fr;
     }
+    
+    .ai-analysis-section {
+        padding: 20px 15px;
+    }
+    
+    .image-library-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -729,8 +754,31 @@
         padding: 15px;
     }
     
+    .nav-container {
+        gap: 8px;
+        padding: 0 8px;
+    }
+    
+    .nav-link {
+        padding: 6px 10px;
+        font-size: 12px;
+        flex-direction: column;
+        text-align: center;
+        gap: 4px;
+        min-width: 60px;
+    }
+    
+    .nav-link span:not(.nav-icon) {
+        font-size: 10px;
+        line-height: 1.2;
+    }
+    
+    .nav-icon {
+        font-size: 14px;
+    }
+    
     .ai-analysis-section {
-        padding: 20px 15px;
+        padding: 15px 10px;
     }
     
     .quick-add-buttons {
@@ -740,5 +788,51 @@
     .quick-add-btn {
         padding: 4px 8px;
         font-size: 11px;
+    }
+    
+    .image-library-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 6px;
+    }
+    
+    .ai-upload-area {
+        padding: 15px;
+    }
+    
+    .ai-analysis-title {
+        font-size: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .nav-container {
+        gap: 6px;
+        padding: 0 6px;
+    }
+    
+    .nav-link {
+        padding: 5px 8px;
+        font-size: 11px;
+        min-width: 50px;
+    }
+    
+    .nav-link span:not(.nav-icon) {
+        font-size: 9px;
+    }
+    
+    .nav-icon {
+        font-size: 12px;
+    }
+    
+    .ai-analysis-section {
+        padding: 12px 8px;
+    }
+    
+    .ai-analysis-title {
+        font-size: 1.3rem;
     }
 }

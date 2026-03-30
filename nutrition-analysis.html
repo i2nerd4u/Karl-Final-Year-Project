@@ -285,6 +285,68 @@
             box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
         
+        .portion-control {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .portion-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .portion-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .portion-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            color: #6c757d;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .portion-btn:hover {
+            border-color: #3498db;
+            color: #3498db;
+            transform: translateY(-1px);
+        }
+        
+        .portion-btn.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-color: #3498db;
+            color: white;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .portion-info {
+            text-align: center;
+            margin-top: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
         @media (max-width: 768px) {
             .analysis-card.expanded {
                 grid-template-columns: 1fr;
@@ -302,6 +364,16 @@
             .nutrition-grid {
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
                 gap: 15px;
+            }
+            
+            .portion-buttons {
+                gap: 6px;
+            }
+            
+            .portion-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                min-width: 50px;
             }
         }
     </style>
@@ -592,37 +664,39 @@
                         </div>
                     </div>
                     
+                    <div class="portion-control">
+                        <div class="portion-title">
+                            🍽️ Portion Size
+                        </div>
+                        <div class="portion-buttons">
+                            <button class="portion-btn" onclick="setPortion('${imageId}', 0.25)">1/4</button>
+                            <button class="portion-btn" onclick="setPortion('${imageId}', 0.5)">1/2</button>
+                            <button class="portion-btn" onclick="setPortion('${imageId}', 0.75)">3/4</button>
+                            <button class="portion-btn active" onclick="setPortion('${imageId}', 1)">1x</button>
+                            <button class="portion-btn" onclick="setPortion('${imageId}', 1.5)">1.5x</button>
+                            <button class="portion-btn" onclick="setPortion('${imageId}', 2)">2x</button>
+                            <button class="portion-btn" onclick="setPortion('${imageId}', 3)">3x</button>
+                        </div>
+                        <div class="portion-info" id="portion-info-${imageId}">
+                            Current portion: 1 serving (100% of label values)
+                        </div>
+                    </div>
+                    
                     <div class="nutrition-grid">
                         <div class="nutrition-item">
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
-                                <button onclick="adjustNutrientInAnalysisPage('calories', -10, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▼</button>
-                                <div class="nutrition-value" id="calories-${imageId}">${calories}</div>
-                                <button onclick="adjustNutrientInAnalysisPage('calories', 10, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▲</button>
-                            </div>
+                            <div class="nutrition-value" id="calories-${imageId}">${calories}</div>
                             <div class="nutrition-label">Calories</div>
                         </div>
                         <div class="nutrition-item">
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
-                                <button onclick="adjustNutrientInAnalysisPage('protein', -1, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▼</button>
-                                <div class="nutrition-value" id="protein-${imageId}">${nutritionFacts.protein}</div>
-                                <button onclick="adjustNutrientInAnalysisPage('protein', 1, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▲</button>
-                            </div>
+                            <div class="nutrition-value" id="protein-${imageId}">${nutritionFacts.protein}</div>
                             <div class="nutrition-label">Protein</div>
                         </div>
                         <div class="nutrition-item">
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
-                                <button onclick="adjustNutrientInAnalysisPage('carbs', -1, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▼</button>
-                                <div class="nutrition-value" id="carbs-${imageId}">${nutritionFacts.carbs}</div>
-                                <button onclick="adjustNutrientInAnalysisPage('carbs', 1, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▲</button>
-                            </div>
+                            <div class="nutrition-value" id="carbs-${imageId}">${nutritionFacts.carbs}</div>
                             <div class="nutrition-label">Carbs</div>
                         </div>
                         <div class="nutrition-item">
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
-                                <button onclick="adjustNutrientInAnalysisPage('fat', -1, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▼</button>
-                                <div class="nutrition-value" id="fat-${imageId}">${nutritionFacts.fat}</div>
-                                <button onclick="adjustNutrientInAnalysisPage('fat', 1, '${imageId}'); return false;" style="background: rgba(0,0,0,0.1); border: none; color: #666; font-size: 12px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer;">▲</button>
-                            </div>
+                            <div class="nutrition-value" id="fat-${imageId}">${nutritionFacts.fat}</div>
                             <div class="nutrition-label">Fat</div>
                         </div>
                     </div>
@@ -633,7 +707,7 @@
                     </div>
                     
                     <div class="action-buttons">
-                        <button onclick="addToCalorieTracker(getAdjustedCalories('${imageId}', ${calories}), '${foodName}')" class="btn-primary" id="addBtn-${imageId}">
+                        <button onclick="addToCalorieTracker(getCurrentPortionCalories('${imageId}'), '${foodName}')" class="btn-primary" id="addBtn-${imageId}">
                             ➕ Add <span id="calorieAmount-${imageId}">${calories || 0}</span> calories
                         </button>
                         <a href="user_dashboard.html" class="btn-primary">
@@ -777,6 +851,121 @@
             }
             
             return Math.max(0, originalCalories + entry.adjustments.calories);
+        };
+        
+        // Portion control functions
+        window.setPortion = function(imageId, multiplier) {
+            // Prevent event bubbling to avoid closing the card
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // Update active button
+            const card = document.getElementById(`card-${imageId}`);
+            if (card) {
+                const buttons = card.querySelectorAll('.portion-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                if (event && event.target) {
+                    event.target.classList.add('active');
+                }
+            }
+            
+            // Get original nutrition values
+            const aiAnalysisEntries = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
+            const entry = aiAnalysisEntries.find(e => e.id === imageId);
+            
+            if (!entry) return;
+            
+            let analysisData = {};
+            if (entry.analysis) {
+                try {
+                    analysisData = JSON.parse(entry.analysis);
+                } catch (e) {
+                    analysisData = {};
+                }
+            }
+            
+            // Get original values
+            const originalCalories = parseInt(analysisData.calories) || parseInt(entry.calories) || 0;
+            const originalProtein = parseFloat((analysisData.protein || '0g').toString().replace('g', '')) || 0;
+            const originalCarbs = parseFloat((analysisData.carbs || '0g').toString().replace('g', '')) || 0;
+            const originalFat = parseFloat((analysisData.fat || '0g').toString().replace('g', '')) || 0;
+            
+            // Calculate adjusted values
+            const adjustedCalories = Math.round(originalCalories * multiplier);
+            const adjustedProtein = (originalProtein * multiplier).toFixed(1);
+            const adjustedCarbs = (originalCarbs * multiplier).toFixed(1);
+            const adjustedFat = (originalFat * multiplier).toFixed(1);
+            
+            // Update display
+            const caloriesEl = document.getElementById(`calories-${imageId}`);
+            const proteinEl = document.getElementById(`protein-${imageId}`);
+            const carbsEl = document.getElementById(`carbs-${imageId}`);
+            const fatEl = document.getElementById(`fat-${imageId}`);
+            const portionInfoEl = document.getElementById(`portion-info-${imageId}`);
+            const calorieAmountEl = document.getElementById(`calorieAmount-${imageId}`);
+            
+            if (caloriesEl) caloriesEl.textContent = adjustedCalories;
+            if (proteinEl) proteinEl.textContent = adjustedProtein + 'g';
+            if (carbsEl) carbsEl.textContent = adjustedCarbs + 'g';
+            if (fatEl) fatEl.textContent = adjustedFat + 'g';
+            if (calorieAmountEl) calorieAmountEl.textContent = adjustedCalories;
+            
+            // Update portion info
+            if (portionInfoEl) {
+                let portionText = '';
+                if (multiplier === 0.25) portionText = 'Current portion: 1/4 serving (25% of label values)';
+                else if (multiplier === 0.5) portionText = 'Current portion: 1/2 serving (50% of label values)';
+                else if (multiplier === 0.75) portionText = 'Current portion: 3/4 serving (75% of label values)';
+                else if (multiplier === 1) portionText = 'Current portion: 1 serving (100% of label values)';
+                else if (multiplier === 1.5) portionText = 'Current portion: 1.5 servings (150% of label values)';
+                else if (multiplier === 2) portionText = 'Current portion: 2 servings (200% of label values)';
+                else if (multiplier === 3) portionText = 'Current portion: 3 servings (300% of label values)';
+                else portionText = `Current portion: ${multiplier}x serving (${Math.round(multiplier * 100)}% of label values)`;
+                
+                portionInfoEl.textContent = portionText;
+            }
+            
+            // Store the current multiplier for this entry
+            if (!entry.portionData) entry.portionData = {};
+            entry.portionData.multiplier = multiplier;
+            entry.portionData.adjustedCalories = adjustedCalories;
+            entry.portionData.adjustedProtein = adjustedProtein;
+            entry.portionData.adjustedCarbs = adjustedCarbs;
+            entry.portionData.adjustedFat = adjustedFat;
+            
+            // Update localStorage
+            const entryIndex = aiAnalysisEntries.findIndex(e => e.id === imageId);
+            if (entryIndex !== -1) {
+                aiAnalysisEntries[entryIndex] = entry;
+                localStorage.setItem('aiAnalysisEntries', JSON.stringify(aiAnalysisEntries));
+            }
+        };
+        
+        // Function to get current portion calories
+        window.getCurrentPortionCalories = function(imageId) {
+            const aiAnalysisEntries = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
+            const entry = aiAnalysisEntries.find(e => e.id === imageId);
+            
+            if (!entry) return 0;
+            
+            // If portion data exists, use adjusted calories
+            if (entry.portionData && entry.portionData.adjustedCalories) {
+                return entry.portionData.adjustedCalories;
+            }
+            
+            // Otherwise use original calories
+            let analysisData = {};
+            if (entry.analysis) {
+                try {
+                    analysisData = JSON.parse(entry.analysis);
+                } catch (e) {
+                    analysisData = {};
+                }
+            }
+            
+            return parseInt(analysisData.calories) || parseInt(entry.calories) || 0;
         };
     </script>
 </body>

@@ -21,8 +21,8 @@
         </div>
     </header>
 
-    <!-- Navigation Bar -->
-    <nav class="nav-bar">
+    <!-- Navigation Bar - Only shown to logged-in users -->
+    <nav class="nav-bar" id="navBar" style="display: none;">
         <div class="nav-container">
             <a href="#userContent" onclick="scrollToSection('userContent')" class="nav-link">
                 <span class="nav-icon">🔥</span>
@@ -57,10 +57,35 @@
             <p class="welcome-subtitle">Your personal nutrition tracker</p>
             
             <div id="guestContent">
-                <p>Sign in or register to start tracking your nutrition.</p>
-                <div class="guest-buttons">
-                    <a href="login.html" class="btn">Sign In</a>
-                    <a href="register.html" class="btn">Register</a>
+                <div style="text-align: center; padding: 40px; background: white; border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); margin: 20px 0;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🍎</div>
+                    <h2 style="color: #2c3e50; margin-bottom: 15px;">Welcome to MealMate</h2>
+                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1rem;">Your personal nutrition tracker and meal planning companion</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+                        <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 25px; border-radius: 15px; text-align: center;">
+                            <div style="font-size: 32px; margin-bottom: 10px;">🤖</div>
+                            <h3 style="margin: 0 0 10px 0;">AI-Powered Analysis</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Upload food photos for instant nutrition analysis</p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 25px; border-radius: 15px; text-align: center;">
+                            <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+                            <h3 style="margin: 0 0 10px 0;">Track Your Progress</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Monitor calories, nutrients, and health goals</p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 25px; border-radius: 15px; text-align: center;">
+                            <div style="font-size: 32px; margin-bottom: 10px;">📅</div>
+                            <h3 style="margin: 0 0 10px 0;">Meal Planning</h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Plan your weekly meals and shopping lists</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guest-buttons" style="margin-top: 30px;">
+                        <a href="login.html" class="btn" style="background: #2c3e50; color: white; padding: 12px 24px; margin: 0 10px; text-decoration: none; border-radius: 25px; font-weight: 600;">Sign In</a>
+                        <a href="register.html" class="btn" style="background: #3498db; color: white; padding: 12px 24px; margin: 0 10px; text-decoration: none; border-radius: 25px; font-weight: 600;">Get Started</a>
+                    </div>
                 </div>
             </div>
             
@@ -323,7 +348,7 @@
         </section>
 
         <div id="nutritionContent" style="display: none;">
-
+            <!-- This content is only shown to logged-in users -->
             <section class="breakdown-section">
                 <h2 class="section-title">Let's break it down</h2>
                 <h2>--------------------------------------------------</h2>
@@ -569,12 +594,122 @@
                         }
                     });
                 } else {
-                    currentValue = parseFloat(element.textContent.replace('g', '')) || 0;
+                    currentValue = parseFloat(element.textContent.replace('g', '').replace('mg', '')) || 0;
                     const newValue = Math.max(0, currentValue + amount);
-                    element.textContent = newValue.toFixed(1) + 'g';
+                    const unit = element.textContent.includes('mg') ? 'mg' : 'g';
+                    element.textContent = (unit === 'g' ? newValue.toFixed(1) : Math.round(newValue)) + unit;
                 }
             }
             return false;
+        };
+        
+        // Portion control function for index page
+        window.setPortionInIndex = function(analysisId, multiplier) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // Update active button styling
+            const allButtons = document.querySelectorAll('.portion-btn-index');
+            allButtons.forEach(btn => {
+                btn.style.background = 'rgba(255,255,255,0.1)';
+                btn.style.border = '1px solid rgba(255,255,255,0.3)';
+                btn.style.boxShadow = 'none';
+                btn.classList.remove('active-portion');
+            });
+            
+            if (event && event.target) {
+                event.target.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
+                event.target.style.border = '1px solid #3498db';
+                event.target.style.boxShadow = '0 2px 8px rgba(52, 152, 219, 0.3)';
+                event.target.classList.add('active-portion');
+            }
+            
+            // Get original values (assuming they're stored or can be calculated)
+            // For simplicity, we'll use current values divided by previous multiplier
+            const caloriesEl = document.getElementById(`calories-${analysisId}`);
+            const proteinEl = document.getElementById(`protein-${analysisId}`);
+            const carbsEl = document.getElementById(`carbs-${analysisId}`);
+            const fatsEl = document.getElementById(`fats-${analysisId}`);
+            const sodiumEl = document.getElementById(`sodium-${analysisId}`);
+            const fiberEl = document.getElementById(`fiber-${analysisId}`);
+            const sugarEl = document.getElementById(`sugar-${analysisId}`);
+            const cholesterolEl = document.getElementById(`cholesterol-${analysisId}`);
+            const portionInfoEl = document.getElementById(`portion-info-${analysisId}`);
+            
+            // Also get the action section elements
+            const actionCaloriesEl = document.getElementById(`action-calories-${analysisId}`);
+            const addBtnEl = document.getElementById(`add-btn-${analysisId}`);
+            const addBtnTextEl = document.getElementById(`add-btn-text-${analysisId}`);
+            
+            // Store original values if not already stored
+            if (!window.originalNutritionValues) {
+                window.originalNutritionValues = {};
+            }
+            
+            if (!window.originalNutritionValues[analysisId]) {
+                window.originalNutritionValues[analysisId] = {
+                    calories: parseInt(caloriesEl.textContent) || 0,
+                    protein: parseFloat(proteinEl.textContent.replace('g', '')) || 0,
+                    carbs: parseFloat(carbsEl.textContent.replace('g', '')) || 0,
+                    fats: parseFloat(fatsEl.textContent.replace('g', '')) || 0,
+                    sodium: parseInt(sodiumEl.textContent.replace('mg', '')) || 0,
+                    fiber: parseFloat(fiberEl.textContent.replace('g', '')) || 0,
+                    sugar: parseFloat(sugarEl.textContent.replace('g', '')) || 0,
+                    cholesterol: parseInt(cholesterolEl.textContent.replace('mg', '')) || 0
+                };
+            }
+            
+            const original = window.originalNutritionValues[analysisId];
+            
+            // Calculate adjusted values
+            const adjustedCalories = Math.round(original.calories * multiplier);
+            const adjustedProtein = (original.protein * multiplier).toFixed(1);
+            const adjustedCarbs = (original.carbs * multiplier).toFixed(1);
+            const adjustedFats = (original.fats * multiplier).toFixed(1);
+            const adjustedSodium = Math.round(original.sodium * multiplier);
+            const adjustedFiber = (original.fiber * multiplier).toFixed(1);
+            const adjustedSugar = (original.sugar * multiplier).toFixed(1);
+            const adjustedCholesterol = Math.round(original.cholesterol * multiplier);
+            
+            // Update nutrition facts display
+            if (caloriesEl) caloriesEl.textContent = adjustedCalories;
+            if (proteinEl) proteinEl.textContent = adjustedProtein + 'g';
+            if (carbsEl) carbsEl.textContent = adjustedCarbs + 'g';
+            if (fatsEl) fatsEl.textContent = adjustedFats + 'g';
+            if (sodiumEl) sodiumEl.textContent = adjustedSodium + 'mg';
+            if (fiberEl) fiberEl.textContent = adjustedFiber + 'g';
+            if (sugarEl) sugarEl.textContent = adjustedSugar + 'g';
+            if (cholesterolEl) cholesterolEl.textContent = adjustedCholesterol + 'mg';
+            
+            // Update action section calories display and button
+            if (actionCaloriesEl) actionCaloriesEl.textContent = adjustedCalories;
+            if (addBtnTextEl) addBtnTextEl.textContent = `Add ${adjustedCalories} Calories`;
+            if (addBtnEl) {
+                addBtnEl.onclick = function() { addToCalorieCounter(adjustedCalories, 'AI Analysis'); };
+            }
+            
+            // Update portion info
+            if (portionInfoEl) {
+                let portionText = '';
+                if (multiplier === 0.25) portionText = 'Current portion: 1/4 serving (25% of label values)';
+                else if (multiplier === 0.5) portionText = 'Current portion: 1/2 serving (50% of label values)';
+                else if (multiplier === 0.75) portionText = 'Current portion: 3/4 serving (75% of label values)';
+                else if (multiplier === 1) portionText = 'Current portion: 1 serving (100% of label values)';
+                else if (multiplier === 1.5) portionText = 'Current portion: 1.5 servings (150% of label values)';
+                else if (multiplier === 2) portionText = 'Current portion: 2 servings (200% of label values)';
+                else if (multiplier === 3) portionText = 'Current portion: 3 servings (300% of label values)';
+                else portionText = `Current portion: ${multiplier}x serving (${Math.round(multiplier * 100)}% of label values)`;
+                
+                portionInfoEl.textContent = portionText;
+            }
+        };
+        
+        // Helper function to get current portion calories from display
+        window.getCurrentPortionCaloriesFromDisplay = function(analysisId) {
+            const actionCaloriesEl = document.getElementById(`action-calories-${analysisId}`);
+            return actionCaloriesEl ? parseInt(actionCaloriesEl.textContent) || 0 : 0;
         };
         
         // Direct Cognito authentication functions
@@ -711,6 +846,7 @@
                     document.getElementById('userContent').style.display = 'block';
                     document.getElementById('nutritionContent').style.display = 'block';
                     document.getElementById('guestContent').style.display = 'none';
+                    document.getElementById('navBar').style.display = 'block';
                     
                     // Auto-load image library on page load
                     setTimeout(() => {
@@ -1688,69 +1824,58 @@
                                     <span style="font-size: 20px;">🍎</span> 
                                     <span style="font-size: 18px; font-weight: 600;">Complete Nutrition Facts</span>
                                 </div>
+                                
+                                <!-- Portion Control Section -->
+                                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: bold; color: #3498db;">
+                                        <span style="font-size: 16px;">🍽️</span> 
+                                        <span>Portion Size</span>
+                                    </div>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
+                                        <button onclick="setPortionInIndex('${analysisId}', 0.25)" class="portion-btn-index" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease;">1/4</button>
+                                        <button onclick="setPortionInIndex('${analysisId}', 0.5)" class="portion-btn-index" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease;">1/2</button>
+                                        <button onclick="setPortionInIndex('${analysisId}', 0.75)" class="portion-btn-index" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease;">3/4</button>
+                                        <button onclick="setPortionInIndex('${analysisId}', 1)" class="portion-btn-index active-portion" style="background: linear-gradient(135deg, #3498db, #2980b9); border: 1px solid #3498db; color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);">1x</button>
+                                        <button onclick="setPortionInIndex('${analysisId}', 1.5)" class="portion-btn-index" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease;">1.5x</button>
+                                        <button onclick="setPortionInIndex('${analysisId}', 2)" class="portion-btn-index" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease;">2x</button>
+                                        <button onclick="setPortionInIndex('${analysisId}', 3)" class="portion-btn-index" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s ease;">3x</button>
+                                    </div>
+                                    <div style="text-align: center; font-size: 11px; color: rgba(255,255,255,0.7);" id="portion-info-${analysisId}">
+                                        Current portion: 1 serving (100% of label values)
+                                    </div>
+                                </div>
+                                
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('calories', -10, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="calories-${analysisId}">${adjustedCalories}</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('calories', 10, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="calories-${analysisId}">${adjustedCalories}</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Calories</div>
                                     </div>
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('carbs', -1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="carbs-${analysisId}">${adjustedCarbs.toFixed(1)}g</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('carbs', 1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="carbs-${analysisId}">${adjustedCarbs.toFixed(1)}g</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Carbs</div>
                                     </div>
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('protein', -1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="protein-${analysisId}">${adjustedProtein.toFixed(1)}g</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('protein', 1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="protein-${analysisId}">${adjustedProtein.toFixed(1)}g</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Protein</div>
                                     </div>
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('fats', -1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="fats-${analysisId}">${adjustedFats.toFixed(1)}g</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('fats', 1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="fats-${analysisId}">${adjustedFats.toFixed(1)}g</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Fats</div>
                                     </div>
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('sodium', -50, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="sodium-${analysisId}">${adjustedSodium}mg</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('sodium', 50, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="sodium-${analysisId}">${adjustedSodium}mg</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Sodium</div>
                                     </div>
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('fiber', -1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="fiber-${analysisId}">${adjustedFiber.toFixed(1)}g</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('fiber', 1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="fiber-${analysisId}">${adjustedFiber.toFixed(1)}g</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Fiber</div>
                                     </div>
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('sugar', -1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="sugar-${analysisId}">${adjustedSugar.toFixed(1)}g</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('sugar', 1, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="sugar-${analysisId}">${adjustedSugar.toFixed(1)}g</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Sugar</div>
                                     </div>
                                     <div style="background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.08)); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
-                                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
-                                            <button onclick="adjustNutrientInIndexAnalysis('cholesterol', -10, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▼</button>
-                                            <div style="font-size: 20px; font-weight: bold; color: #fff;" id="cholesterol-${analysisId}">${adjustedCholesterol}mg</div>
-                                            <button onclick="adjustNutrientInIndexAnalysis('cholesterol', 10, '${analysisId}')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; cursor: pointer;">▲</button>
-                                        </div>
+                                        <div style="font-size: 20px; font-weight: bold; color: #fff;" id="cholesterol-${analysisId}">${adjustedCholesterol}mg</div>
                                         <div style="font-size: 11px; opacity: 0.8; font-weight: 600;">Cholesterol</div>
                                     </div>
                                 </div>
@@ -1783,20 +1908,23 @@
                         // Calculate final adjusted calories
                         const finalCalories = Math.max(0, (parseInt(calories) || 0) + (adjustments.calories || 0));
                         
+                        // Generate unique ID for this analysis to match with nutrition facts
+                        const analysisId = 'index_' + Date.now();
+                        
                         return `
                             <div style="background: rgba(255,255,255,0.05); padding: 28px; border-radius: 15px; text-align: center;">
                                 <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 25px;">
                                     <div style="background: ${finalCalories > 0 ? 'linear-gradient(135deg, #2ecc71, #27ae60)' : 'linear-gradient(135deg, #95a5a6, #7f8c8d)'}; padding: 18px 30px; border-radius: 35px; display: flex; align-items: center; gap: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.1);">
                                         <span style="font-size: 28px;">${finalCalories > 0 ? '🔥' : '❓'}</span>
                                         <div>
-                                            <div style="font-weight: bold; font-size: 26px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${finalCalories}</div>
+                                            <div style="font-weight: bold; font-size: 26px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);" id="action-calories-${analysisId}">${finalCalories}</div>
                                             <div style="font-size: 13px; opacity: 0.9; color: white; font-weight: 500;">Calories</div>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div style="display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
-                                    <button onclick="addToCalorieCounter(${finalCalories}, '${foodName}')" 
+                                    <button onclick="addToCalorieCounter(getCurrentPortionCaloriesFromDisplay('${analysisId}'), '${foodName}')" 
                                             style="background: ${finalCalories > 0 ? 'linear-gradient(135deg, #2ecc71, #27ae60)' : 'linear-gradient(135deg, #95a5a6, #7f8c8d)'}; 
                                                 color: white; border: none; padding: 16px 32px; border-radius: 28px; 
                                                 cursor: ${finalCalories > 0 ? 'pointer' : 'not-allowed'}; font-size: 15px; font-weight: bold; 
@@ -1804,9 +1932,10 @@
                                                 display: inline-flex; align-items: center; gap: 10px; border: 2px solid rgba(255,255,255,0.1);" 
                                             ${finalCalories <= 0 ? 'disabled' : ''}
                                             onmouseover="if(!this.disabled) { this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.3)'; }"
-                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)';">
+                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)';" 
+                                            id="add-btn-${analysisId}">
                                         <span style="font-size: 18px;">➕</span> 
-                                        <span>Add ${finalCalories} Calories</span>
+                                        <span id="add-btn-text-${analysisId}">Add ${finalCalories} Calories</span>
                                     </button>
                                     
                                     <a href="nutrition-analysis.html" 
