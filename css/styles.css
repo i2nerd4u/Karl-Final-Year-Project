@@ -130,28 +130,9 @@
 }
 
 /* Button Styles */
-.btn {
-    background: #2c3e50;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 4px;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    margin-right: 10px;
-}
-
 .btn-register {
     background: #2c3e50;
     color: white;
-}
-
-.btn:hover {
-    opacity: 0.9;
 }
 
 /* AI Analysis Section */
