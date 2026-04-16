@@ -1398,8 +1398,6 @@
                                     }
                                     // Only display the real AI analysis, skip any fallback
                                     displayAINutritionAnalysis(result.analysis, result.filename || image.filename, result, image.imageUrl || image.imageData);
-                                    updateBreakdownCards(); // Update breakdown cards after analysis
-                                    updateRecommendations(); // Update recommendations after analysis
                                 } else {
                                     showAIUploadStatus(`❌ Error: ${result.error}`, 'error');
                                 }
@@ -1480,8 +1478,6 @@
                                             contentDiv.innerHTML = '';
                                         }
                                         displayAINutritionAnalysis(result.analysis, result.filename || file.name, result, s3Url || e.target.result);
-                                        updateBreakdownCards(); // Update breakdown cards after new analysis
-                                        updateRecommendations(); // Update recommendations after new analysis
                                     } else {
                                         showAIUploadStatus(`❌ Error: ${result.error}`, 'error');
                                     }
@@ -2776,13 +2772,6 @@
                                     window.initializePersonalizedInsights();
                                 }, 500);
                             }
-                            
-                            // Update breakdown cards
-                            if (window.updateBreakdownCards) {
-                                setTimeout(() => {
-                                    window.updateBreakdownCards();
-                                }, 500);
-                            }
                         });
                         
                         submitCaloriesBtn.addEventListener('click', function() {
@@ -3179,7 +3168,7 @@
                             }
                         });
                         
-                        breakdownGrid.innerHTML = generateBreakdownCards(0, 0, 0, totalCarbsGrams, totalProteinGrams, totalFatGrams);
+                        // Removed static breakdown cards - now handled by enhanced-breakdown.js
                     }
                     
                     function updateRecommendations() {

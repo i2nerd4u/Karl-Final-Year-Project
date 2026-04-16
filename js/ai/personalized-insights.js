@@ -477,13 +477,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     setTimeout(() => {
                         initializePersonalizedInsights();
                     }, 500);
-                    
-                    // Update breakdown cards
-                    if (window.updateBreakdownCards) {
-                        setTimeout(() => {
-                            window.updateBreakdownCards();
-                        }, 500);
-                    }
                 });
             }
         }
