@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Protein Calculation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .debug-output { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Debug Protein Calculation Issue</h1>
+    
+    <div class="debug-section">
+        <h2>Current AI Analysis Entries</h2>
+        <button onclick="showAIAnalyses()">Show AI Analyses</button>
+        <div id="aiAnalysesOutput" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Current Food Entries</h2>
+        <button onclick="showFoodEntries()">Show Food Entries</button>
+        <div id="foodEntriesOutput" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Breakdown Cards Calculation</h2>
+        <button onclick="debugBreakdownCalculation()">Debug Calculation</button>
+        <div id="calculationOutput" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Test Protein Addition</h2>
+        <button onclick="addTestMeal()">Add Test Meal (22g protein)</button>
+        <button onclick="clearAllData()">Clear All Data</button>
+        <div id="testOutput" class="debug-output"></div>
+    </div>
+
+    <script>
+        function showAIAnalyses() {
+            const aiAnalyses = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
+            document.getElementById('aiAnalysesOutput').innerHTML = '<pre>' + JSON.stringify(aiAnalyses, null, 2) + '</pre>';
+        }
+        
+        function showFoodEntries() {
+            const foodEntries = JSON.parse(localStorage.getItem('foodEntries') || '[]');
+            document.getElementById('foodEntriesOutput').innerHTML = '<pre>' + JSON.stringify(foodEntries, null, 2) + '</pre>';
+        }
+        
+        function debugBreakdownCalculation() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const userId = userData.userId || 'guest';
+            const foodEntries = JSON.parse(localStorage.getItem('foodEntries') || '[]');
+            const aiAnalyses = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
+            
+            // Filter entries for current user
+            const userFoodEntries = foodEntries.filter(entry => entry.userId === userId);
+            const userAIAnalyses = aiAnalyses.filter(entry => entry.userId === userId);
+            
+            // Calculate totals from recent entries (last 7 days)
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            
+            const recentEntries = userFoodEntries.filter(entry => {
+                const entryDate = new Date(entry.timestamp);
+                return entryDate >= weekAgo;
+            });
+            
+            let totalProtein = 0;
+            
+            // Calculate from food entries
+            recentEntries.forEach(entry => {
+                if (entry.nutritionInfo && entry.nutritionInfo.protein) {
+                    totalProtein += entry.nutritionInfo.protein;
+                } else if (entry.calories > 0) {
+                    const estimatedProtein = (entry.calories * 0.15) / 4;
+                    totalProtein += estimatedProtein;
+                }
+            });
+            
+            // Add data from AI analyses
+            userAIAnalyses.forEach(analysis => {
+                let analysisData = {};
+                if (analysis.analysis) {
+                    try {
+                        if (typeof analysis.analysis === 'string') {
+                            analysisData = JSON.parse(analysis.analysis);
+                        } else {
+                            analysisData = analysis.analysis;
+                        }
+                    } catch (e) {
+                        const analysisText = analysis.analysis || '';
+                        const proteinMatch = analysisText.match(/protein[:\s]+(\d+(?:\.\d+)?)\s*g/i);
+                        if (proteinMatch) analysisData.protein = parseFloat(proteinMatch[1]);
+                    }
+                }
+                
+                const proteinValue = parseFloat(analysisData.protein) || 0;
+                if (proteinValue > 0) {
+                    totalProtein += proteinValue;
+                } else if (analysis.calories > 0) {
+                    const estimatedProtein = (analysis.calories * 0.15) / 4;
+                    totalProtein += estimatedProtein;
+                }
+            });
+            
+            const days = Math.max(1, Math.ceil((new Date() - weekAgo) / (1000 * 60 * 60 * 24)));
+            const avgProtein = Math.round(totalProtein / days);
+            
+            const output = {
+                userId: userId,
+                userFoodEntries: userFoodEntries.length,
+                userAIAnalyses: userAIAnalyses.length,
+                recentEntries: recentEntries.length,
+                totalProtein: totalProtein,
+                days: days,
+                avgProtein: avgProtein,
+                detailedCalculation: {
+                    fromFoodEntries: recentEntries.map(entry => ({
+                        name: entry.name,
+                        protein: entry.nutritionInfo?.protein || 'estimated from calories',
+                        calories: entry.calories
+                    })),
+                    fromAIAnalyses: userAIAnalyses.map(analysis => {
+                        let analysisData = {};
+                        try {
+                            analysisData = typeof analysis.analysis === 'string' ? JSON.parse(analysis.analysis) : analysis.analysis;
+                        } catch (e) {
+                            analysisData = { parseError: true, rawText: analysis.analysis };
+                        }
+                        return {
+                            filename: analysis.filename,
+                            protein: analysisData.protein || 'not found',
+                            calories: analysis.calories,
+                            analysisData: analysisData
+                        };
+                    })
+                }
+            };
+            
+            document.getElementById('calculationOutput').innerHTML = '<pre>' + JSON.stringify(output, null, 2) + '</pre>';
+        }
+        
+        function addTestMeal() {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const userId = userData.userId || 'guest';
+            
+            // Add a test AI analysis entry with 22g protein
+            const testAnalysis = {
+                id: 'test_' + Date.now(),
+                userId: userId,
+                filename: 'test-meal.jpg',
+                analysis: JSON.stringify({
+                    protein: 22,
+                    carbs: 30,
+                    fat: 10,
+                    calories: 280
+                }),
+                calories: 280,
+                foodName: 'Test Meal',
+                timestamp: new Date().toISOString()
+            };
+            
+            let aiAnalyses = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
+            aiAnalyses.unshift(testAnalysis);
+            localStorage.setItem('aiAnalysisEntries', JSON.stringify(aiAnalyses));
+            
+            // Also add as food entry
+            const testFoodEntry = {
+                userId: userId,
+                calories: 280,
+                name: 'Test Meal',
+                timestamp: new Date().toISOString(),
+                source: 'test',
+                nutritionInfo: {
+                    protein: 22,
+                    carbs: 30,
+                    fats: 10
+                }
+            };
+            
+            let foodEntries = JSON.parse(localStorage.getItem('foodEntries') || '[]');
+            foodEntries.push(testFoodEntry);
+            localStorage.setItem('foodEntries', JSON.stringify(foodEntries));
+            
+            document.getElementById('testOutput').innerHTML = 'Test meal added with 22g protein!';
+        }
+        
+        function clearAllData() {
+            localStorage.removeItem('aiAnalysisEntries');
+            localStorage.removeItem('foodEntries');
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const userId = userData.userId || 'guest';
+            localStorage.removeItem(`nutritionData_${userId}`);
+            document.getElementById('testOutput').innerHTML = 'All data cleared!';
+        }
+    </script>
+</body>
+</html>
