@@ -1,4 +1,4 @@
-// Restore Calorie Counter and Food Menu Functionality
+// Calorie counter and food menu
 document.addEventListener('DOMContentLoaded', function() {
     // Wait for page to load completely
     setTimeout(() => {

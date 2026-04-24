@@ -316,34 +316,36 @@
                 <div id="healthInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000;">
                     <div style="position: relative; width: 90%; max-width: 500px; margin: 50px auto; background-color: white; padding: 30px; border-radius: 10px;">
                         <button id="closeHealthInfoBtn" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer;">×</button>
-                        <h2 style="margin-top: 0; color: #333;">Tell us about yourself</h2>
+                        <h2 style="margin-top: 0; color: #333;">Edit Profile</h2>
                         <p style="color: #666; margin-bottom: 20px;">Help us provide better nutritional insights by sharing some basic information.</p>
                         
                         <form id="healthInfoForm">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                                <div>
-                                    <label for="modalAge" style="display: block; margin-bottom: 5px; font-weight: bold;">Age</label>
-                                    <input type="number" id="modalAge" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" min="1" max="120">
+                                <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                    <label for="modalAge" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Age</label>
+                                    <input type="number" id="modalAge" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;" min="1" max="120">
                                 </div>
-                                <div>
-                                    <label for="modalWeight" style="display: block; margin-bottom: 5px; font-weight: bold;">Weight (kg)</label>
-                                    <input type="number" id="modalWeight" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" min="1" step="0.1">
+                                <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                    <label for="modalWeight" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Weight (kg)</label>
+                                    <input type="number" id="modalWeight" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;" min="1" step="0.1">
                                 </div>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                                <div>
-                                    <label for="modalHeight" style="display: block; margin-bottom: 5px; font-weight: bold;">Height (cm)</label>
-                                    <input type="number" id="modalHeight" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" min="1" max="300">
+                                <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                    <label for="modalHeight" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Height (cm)</label>
+                                    <input type="number" id="modalHeight" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;" min="1" max="300">
                                 </div>
-                                <div>
-                                    <label for="modalCalorieGoal" style="display: block; margin-bottom: 5px; font-weight: bold;">Daily Calorie Goal</label>
-                                    <input type="number" id="modalCalorieGoal" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" min="500" value="2000">
+                                <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                    <label for="modalCalorieGoal" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50;">Daily Calorie Goal</label>
+                                    <input type="number" id="modalCalorieGoal" style="width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px;" min="500" value="2000">
                                 </div>
                             </div>
-                            <button type="submit" style="width: 100%; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; border: none; border-radius: 5px; padding: 12px; font-size: 16px; cursor: pointer;">Save Information</button>
+                            <button type="submit" style="width: 100%; background: #2c3e50; color: white; border: none; border-radius: 4px; padding: 12px; font-size: 16px; cursor: pointer;">Save Changes</button>
                         </form>
                     </div>
                 </div>
+                
+
             </div>
         </section>
 
@@ -439,9 +441,9 @@
                     </div>
                 </div>
                 
-                <div class="progress-chart">
-                    <h3>Your progress over the past week</h3>
-                    <svg id="calorieChart" viewBox="0 0 280 160" style="width: 100%; height: 160px;">
+                <div class="progress-chart" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-top: 20px;">
+                    <h3 style="font-size: 1.5rem; color: #2c3e50; margin-bottom: 20px;">Your progress over the past week</h3>
+                    <svg id="calorieChart" viewBox="0 0 280 160" style="width: 100%; height: 400px;">
                         <defs>
                             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                 <stop offset="0%" style="stop-color:#3498db"/>
@@ -455,26 +457,38 @@
                         <line x1="20" y1="20" x2="20" y2="140" stroke="#ccc" stroke-width="1"/>
                         
                         <!-- X-axis labels (days) -->
-                        <text x="20" y="155" text-anchor="middle" font-size="10" fill="#666" id="day0">Mon</text>
-                        <text x="60" y="155" text-anchor="middle" font-size="10" fill="#666" id="day1">Tue</text>
-                        <text x="100" y="155" text-anchor="middle" font-size="10" fill="#666" id="day2">Wed</text>
-                        <text x="140" y="155" text-anchor="middle" font-size="10" fill="#666" id="day3">Thu</text>
-                        <text x="180" y="155" text-anchor="middle" font-size="10" fill="#666" id="day4">Fri</text>
-                        <text x="220" y="155" text-anchor="middle" font-size="10" fill="#666" id="day5">Sat</text>
-                        <text x="260" y="155" text-anchor="middle" font-size="10" fill="#666" id="day6">Sun</text>
+                        <text x="20" y="155" text-anchor="middle" font-size="8" fill="#555" font-weight="600" id="day0">Mon</text>
+                        <text x="60" y="155" text-anchor="middle" font-size="8" fill="#555" font-weight="600" id="day1">Tue</text>
+                        <text x="100" y="155" text-anchor="middle" font-size="8" fill="#555" font-weight="600" id="day2">Wed</text>
+                        <text x="140" y="155" text-anchor="middle" font-size="8" fill="#555" font-weight="600" id="day3">Thu</text>
+                        <text x="180" y="155" text-anchor="middle" font-size="8" fill="#555" font-weight="600" id="day4">Fri</text>
+                        <text x="220" y="155" text-anchor="middle" font-size="8" fill="#555" font-weight="600" id="day5">Sat</text>
+                        <text x="260" y="155" text-anchor="middle" font-size="8" fill="#555" font-weight="600" id="day6">Sun</text>
                         
                         <!-- Y-axis labels (calories) -->
-                        <text x="15" y="140" text-anchor="end" font-size="10" fill="#666" id="cal0">0</text>
-                        <text x="15" y="100" text-anchor="end" font-size="10" fill="#666" id="cal1">500</text>
-                        <text x="15" y="60" text-anchor="end" font-size="10" fill="#666" id="cal2">1000</text>
-                        <text x="15" y="20" text-anchor="end" font-size="10" fill="#666" id="cal3">1500</text>
+                        <text x="15" y="140" text-anchor="end" font-size="7" fill="#888" id="cal0">0</text>
+                        <text x="15" y="100" text-anchor="end" font-size="7" fill="#888" id="cal1">500</text>
+                        <text x="15" y="60" text-anchor="end" font-size="7" fill="#888" id="cal2">1000</text>
+                        <text x="15" y="20" text-anchor="end" font-size="7" fill="#888" id="cal3">1500</text>
+                        
+                        <!-- Grid lines -->
+                        <line x1="20" y1="100" x2="260" y2="100" stroke="#eee" stroke-width="0.5"/>
+                        <line x1="20" y1="60" x2="260" y2="60" stroke="#eee" stroke-width="0.5"/>
+                        <line x1="20" y1="20" x2="260" y2="20" stroke="#eee" stroke-width="0.5"/>
                         
                         <!-- The line will be added dynamically -->
-                        <polyline id="caloriePolyline" points="" fill="none" stroke="url(#gradient)" stroke-width="3"/>
+                        <polyline id="caloriePolyline" points="" fill="none" stroke="url(#gradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
                         
                         <!-- Data points will be added dynamically -->
                         <g id="dataPoints"></g>
                     </svg>
+                    <div id="weeklyInsight" style="margin-top: 20px; padding: 18px; background: linear-gradient(135deg, #f8f9fa, #ecf0f1); border-radius: 12px; border-left: 4px solid #3498db; display: flex; align-items: center; gap: 15px;">
+                        <span style="font-size: 28px;" id="insightIcon">💡</span>
+                        <div>
+                            <div style="font-weight: bold; color: #2c3e50; font-size: 1rem; margin-bottom: 4px;" id="insightTitle">Daily Insight</div>
+                            <div style="color: #555; font-size: 0.9rem; line-height: 1.5;" id="insightText">Loading insight...</div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -493,15 +507,6 @@
     <script src="https://unpkg.com/amazon-cognito-identity-js@6.3.12/dist/amazon-cognito-identity.min.js" crossorigin="anonymous"></script>
     <script src="config/aws-config.js"></script>
     <script src="js/utils/image-upload-fix.js"></script>
-    
-    <!-- 
-    COGNITO CONFIGURATION UPDATE NEEDED:
-    - User Pool ID: eu-north-1_kj8Is5Leb
-    - Region: eu-north-1
-    - Domain: Updated to default format
-    - Client ID: REPLACE '5jhuae77guiifjhid4uup14865' with actual app client ID from User Pool
-    -->
-
     <script src="js/auth/cognito-auth.js"></script>
     <script src="js/core/nutrition-db.js"></script>
     <script src="js/utils/floating-fruits.js"></script>
@@ -569,7 +574,7 @@
         
         handleCognitoCallback();
         
-        // Function to adjust nutrients in index analysis - GLOBAL SCOPE
+        // Adjust nutrients on index page
         window.adjustNutrientInIndexAnalysis = function(nutrient, amount, analysisId) {
             if (event) {
                 event.preventDefault();
@@ -602,7 +607,7 @@
             return false;
         };
         
-        // Portion control function for index page
+        // Portion size control
         window.setPortionInIndex = function(analysisId, multiplier) {
             if (event) {
                 event.preventDefault();
@@ -705,13 +710,12 @@
             }
         };
         
-        // Helper function to get current portion calories from display
         window.getCurrentPortionCaloriesFromDisplay = function(analysisId) {
             const actionCaloriesEl = document.getElementById(`action-calories-${analysisId}`);
             return actionCaloriesEl ? parseInt(actionCaloriesEl.textContent) || 0 : 0;
         };
         
-        // Direct Cognito authentication functions
+        // Login/register prompts
         window.showLoginForm = function() {
             const email = prompt('Enter your email:');
             const password = prompt('Enter your password:');
@@ -729,7 +733,6 @@
         };
         
         function loginUser(email, password) {
-            // Simple login - store user data locally
             const userData = {
                 userId: 'user_' + Date.now(),
                 email: email,
@@ -742,7 +745,6 @@
         }
         
         function registerUser(email, password) {
-            // Simple registration - store user data locally
             const userData = {
                 userId: 'user_' + Date.now(),
                 email: email,
@@ -775,7 +777,6 @@
                 });
             });
             
-            // Function to add a floating emoji to the background
             window.addFloatingEmoji = function(emoji) {
                 const floatingFruits = document.querySelector('.floating-fruits');
                 if (!floatingFruits) return;
@@ -1094,7 +1095,6 @@
                         });
                     }
                     
-                    // Helper function to extract S3 URL from various response formats
                     function extractS3UrlFromResponse(data) {
                         console.log('Extracting S3 URL from response:', data);
                         
@@ -1129,7 +1129,6 @@
                         return null;
                     }
                     
-                    // Helper function to extract S3 key from response
                     function extractS3KeyFromResponse(data) {
                         const possibleKeyFields = ['s3Key', 'key', 'Key', 'objectKey', 'fileName'];
                         
@@ -1142,7 +1141,6 @@
                         return null;
                     }
                     
-                    // Function to upload to S3 and then analyze
                     async function uploadToS3AndAnalyze(file) {
                         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
                         const userId = userData.userId || 'user_' + Date.now();
@@ -1259,7 +1257,6 @@
                         }
                     }
                     
-                    // Load Image Library function
                     window.loadImageLibrary = function() {
                         const userImages = JSON.parse(localStorage.getItem('userImages') || '[]');
                         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -1279,7 +1276,6 @@
                         showAIUploadStatus(`Loaded ${userSpecificImages.length} images from your library!`, 'success');
                     };
                     
-                    // Auto-load image library function
                     function autoLoadImageLibrary() {
                         const userImages = JSON.parse(localStorage.getItem('userImages') || '[]');
                         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -1616,7 +1612,7 @@
                         resultsDiv.style.display = 'block';
                         resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     }
-                    // Enhanced AI Display Function - Part 2: General Analysis (No Nutrition Info)
+                    // General analysis display (no nutrition found)
                     function generateGeneralAnalysisHTML(analysisData, filename, imageData, timestamp) {
                         const analysisText = analysisData.raw_analysis || analysisData.analysis || JSON.stringify(analysisData, null, 2);
                         const isNoNutritionFound = /no nutritional information|no nutrition|not a food label|no food label/i.test(analysisText);
@@ -1757,7 +1753,7 @@
                             `;
                         }
                     }
-                    // Enhanced AI Display Function - Part 3: Nutrition Analysis (With Nutrition Info)
+                    // Nutrition analysis display (with nutrition data)
                     function generateNutritionAnalysisHTML(analysisData, calories, filename, imageData, timestamp, foodName) {
                         const nutritionFacts = extractNutritionFacts(analysisData);
                         const productInfo = extractProductInfo(analysisData);
@@ -1960,7 +1956,7 @@
                             </div>
                         `;
                     }
-                    // Enhanced AI Display Function - Part 4: Helper Functions
+                    // Helpers for parsing nutrition data
                     function extractProductInfo(analysisData) {
                         return {
                             name: analysisData.product_name || analysisData.name || null,
@@ -2028,10 +2024,9 @@
                         };
                         return names[nutrient] || nutrient.replace(/([A-Z])/g, ' $1').trim();
                     }
-                    // Complete Enhanced Display Functions Created
+                    
 
-
-                    // Function to adjust nutrients in analysis page
+                    // Nutrient adjustment on analysis page
                     window.adjustNutrientInAnalysis = function(nutrient, amount) {
                         if (event) {
                             event.preventDefault();
@@ -2071,7 +2066,7 @@
                         return false;
                     };
                     
-                    // Add calories to tracker function
+                    // Add calories from AI analysis
                     window.addToCalorieCounter = function(calories, foodName) {
                         if (calories <= 0) {
                             alert('No calories detected to add!');
@@ -2281,7 +2276,6 @@
                         }, 5000);
                     }
                     
-                    // Food browser and search functionality
                     function setupFoodBrowser() {
                         const foodNameInput = document.getElementById('foodNameInput');
                         const resultsDiv = document.getElementById('searchResults');
@@ -2625,7 +2619,6 @@
                         loadSavedFoods();
                     }
                     
-                    // Function to show added tick animation
                     function showAddedTick(element) {
                         // Create tick element
                         const tick = document.createElement('div');
@@ -2662,7 +2655,6 @@
                         }, 1000);
                     }
                     
-                    // Function to add calories to tracker
                     function addCaloriesToTracker(calories, foodName) {
                         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
                         const userId = userData.userId || 'guest';
@@ -2690,7 +2682,6 @@
                         updateCalorieChart();
                     }
                     
-                    // Daily calorie tracking functionality
                     async function initializeCalorieTracker() {
                         // Get elements
                         const setDailyGoalBtn = document.getElementById('setDailyGoalBtn');
@@ -2963,7 +2954,6 @@
                         }).join('');
                     }
                     
-                    // Function to update the calorie chart
                     function updateCalorieChart() {
                         // Get the last 7 days of calorie data
                         const calorieHistory = getCalorieHistory();
@@ -3004,8 +2994,10 @@
                             const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                             circle.setAttribute('cx', x);
                             circle.setAttribute('cy', y);
-                            circle.setAttribute('r', '4');
+                            circle.setAttribute('r', '6');
                             circle.setAttribute('fill', index === 6 ? '#2980b9' : '#3498db');
+                            circle.setAttribute('stroke', 'white');
+                            circle.setAttribute('stroke-width', '2');
                             
                             // Add tooltip with date and calories
                             const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
@@ -3017,9 +3009,41 @@
                         
                         // Update the polyline
                         document.getElementById('caloriePolyline').setAttribute('points', points);
+                        
+                        // Update weekly insight
+                        updateWeeklyInsight(calorieHistory);
                     }
                     
-                    // Function to get calorie history for the last 7 days
+                    function updateWeeklyInsight(calorieHistory) {
+                        const insightIcon = document.getElementById('insightIcon');
+                        const insightTitle = document.getElementById('insightTitle');
+                        const insightText = document.getElementById('insightText');
+                        if (!insightIcon || !insightTitle || !insightText) return;
+                        
+                        const dayOfWeek = new Date().getDay();
+                        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                        const dailyGoal = parseInt(userData.calorieGoal || localStorage.getItem(`dailyCalorieGoal_${userData.userId}`) || '2000');
+                        const todayCalories = calorieHistory.length > 0 ? calorieHistory[calorieHistory.length - 1].calories : 0;
+                        const totalWeek = calorieHistory.reduce((sum, d) => sum + d.calories, 0);
+                        const avgCalories = Math.round(totalWeek / 7);
+                        const daysTracked = calorieHistory.filter(d => d.calories > 0).length;
+                        
+                        const insights = [
+                            { icon: '🌅', title: 'Sunday Reset', text: `Start your week strong! ${daysTracked > 0 ? `Last week you tracked ${daysTracked} day${daysTracked > 1 ? 's' : ''} with an average of ${avgCalories} cal/day.` : 'Set your goals and plan your meals for the week ahead.'}` },
+                            { icon: '💪', title: 'Monday Momentum', text: `Kick off the week right! ${todayCalories > 0 ? `You've logged ${todayCalories} calories so far today.` : 'Start tracking early to stay on top of your goals.'} Your daily target is ${dailyGoal} cal.` },
+                            { icon: '📈', title: 'Tuesday Check-in', text: `Keep the momentum going! ${avgCalories > 0 ? `Your weekly average is ${avgCalories} cal/day ${avgCalories > dailyGoal ? '— slightly above' : avgCalories < dailyGoal * 0.7 ? '— try to eat a bit more to meet' : '— right on track with'} your ${dailyGoal} cal goal.` : 'Log your meals to see trends build up over the week.'}` },
+                            { icon: '⚖️', title: 'Midweek Balance', text: `You're halfway through the week! ${daysTracked >= 3 ? `Great consistency — ${daysTracked} days tracked so far.` : 'Try to log meals consistently for better insights.'} ${todayCalories > dailyGoal ? 'Consider lighter options for dinner.' : 'You still have room in your calorie budget today.'}` },
+                            { icon: '🎯', title: 'Thursday Focus', text: `Almost at the weekend! ${totalWeek > 0 ? `Total intake this week: ${totalWeek} calories across ${daysTracked} day${daysTracked > 1 ? 's' : ''}.` : 'Start logging to see your weekly totals here.'} ${avgCalories > dailyGoal * 1.1 ? 'Consider balancing out with lighter meals tomorrow.' : 'You\'re doing well — keep it up!'}` },
+                            { icon: '🏁', title: 'Friday Finish Strong', text: `End the work week on a high note! ${daysTracked >= 4 ? `Impressive — you've tracked ${daysTracked} days this week.` : 'There\'s still time to build good habits this week.'} ${todayCalories === 0 ? 'Don\'t forget to log your meals today!' : `${todayCalories} cal logged today so far.`}` },
+                            { icon: '🌟', title: 'Saturday Review', text: `Weekend vibes! ${totalWeek > 0 ? `This week you averaged ${avgCalories} cal/day across ${daysTracked} tracked day${daysTracked > 1 ? 's' : ''}.` : 'Weekends are a great time to meal prep and plan ahead.'} ${avgCalories > dailyGoal ? 'Try mindful eating this weekend.' : 'Enjoy your weekend while staying balanced!'}` }
+                        ];
+                        
+                        const insight = insights[dayOfWeek];
+                        insightIcon.textContent = insight.icon;
+                        insightTitle.textContent = insight.title;
+                        insightText.textContent = insight.text;
+                    }
+                    
                     function getCalorieHistory() {
                         const history = [];
                         const today = new Date();
@@ -3067,7 +3091,6 @@
                         return history;
                     }
                     
-                    // Function to adjust nutrients in AI analysis
                     window.adjustNutrientInAnalysis = function(nutrient, amount) {
                         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
                         const userId = userData.userId || 'guest';
@@ -3101,7 +3124,6 @@
                         });
                     };
                     
-                    // Function to update breakdown cards with Bedrock data
                     function updateBreakdownCards() {
                         const aiAnalyses = JSON.parse(localStorage.getItem('aiAnalysisEntries') || '[]');
                         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -3591,7 +3613,6 @@
                         }
                     }
                     
-                    // Function to fetch user profile from DynamoDB
                     async function fetchUserProfile() {
                         const accessToken = localStorage.getItem('access_token');
                         const userData = JSON.parse(localStorage.getItem('userData') || '{}');

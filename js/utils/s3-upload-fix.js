@@ -1,6 +1,4 @@
-// S3 Upload Fix - Add this to your index.html or use as reference
-
-// Enhanced function to extract S3 URL from various response formats
+// Extracts S3 URL from upload response (tries multiple field names)
 function extractS3UrlFromResponse(data) {
     console.log('Extracting S3 URL from response:', data);
     
@@ -39,7 +37,6 @@ function extractS3UrlFromResponse(data) {
     return null;
 }
 
-// Enhanced function to extract S3 key from response
 function extractS3KeyFromResponse(data) {
     const possibleKeyFields = ['s3Key', 'key', 'Key', 'objectKey', 'fileName'];
     
@@ -52,7 +49,7 @@ function extractS3KeyFromResponse(data) {
     return null;
 }
 
-// Use this in your upload functions instead of the current logic:
+// Example usage:
 // const s3Url = extractS3UrlFromResponse(data);
 // const s3Key = extractS3KeyFromResponse(data);
 // 

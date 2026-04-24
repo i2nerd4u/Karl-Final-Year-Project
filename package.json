@@ -1,0 +1,62 @@
+{
+  "name": "mealmate-nutrition-tracker",
+  "version": "1.0.0",
+  "description": "AI-powered nutrition tracking application with comprehensive testing suite",
+  "main": "index.html",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=unit --passWithNoTests",
+    "test:integration": "jest --testPathPattern=integration --passWithNoTests",
+    "test:e2e": "start-server-and-test serve http://localhost:8081 'cypress run --config-file ../config/cypress.config.js'",
+    "test:e2e:open": "start-server-and-test serve http://localhost:8081 'cypress open --config-file ../config/cypress.config.js'",
+    "test:e2e:simple": "start-server-and-test serve http://localhost:8081 'cypress run --config-file ../config/cypress.config.js --spec ../tests/e2e/**/*-simple.cy.js'",
+    "cypress:run": "cypress run --config-file ../config/cypress.config.js",
+    "cypress:open": "cypress open --config-file ../config/cypress.config.js",
+    "test:all": "npm run test:unit && npm run test:integration",
+    "serve": "http-server . -p 8081",
+    "start": "npm run serve"
+  },
+  "keywords": [
+    "nutrition",
+    "tracking",
+    "ai",
+    "health",
+    "calories",
+    "testing"
+  ],
+  "author": "MealMate Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@testing-library/dom": "^9.3.4",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/user-event": "^14.5.1",
+    "cypress": "^13.6.1",
+    "http-server": "^14.1.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "start-server-and-test": "^2.0.3"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/../tests/setup.js"
+    ],
+    "collectCoverageFrom": [
+      "js/**/*.js",
+      "!js/**/*.test.js",
+      "!js/**/*.spec.js"
+    ],
+    "coverageDirectory": "../coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "<rootDir>/../tests/**/*.test.js",
+      "<rootDir>/../tests/**/*.spec.js"
+    ]
+  }
+}

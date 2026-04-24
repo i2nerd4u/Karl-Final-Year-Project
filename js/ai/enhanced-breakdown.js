@@ -146,5 +146,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
-// Export function for use by other scripts
+// Update breakdown cards when food entries change
 window.updateBreakdownCards = updateBreakdownCards;

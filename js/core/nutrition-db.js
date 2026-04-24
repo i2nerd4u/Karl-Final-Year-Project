@@ -1,6 +1,4 @@
-// Enhanced nutrition database with categories and local images
 const nutritionDB = {
-    // Fruits
     apple: { 
         calories: 95, 
         carbs: 25, 
@@ -102,7 +100,6 @@ const nutritionDB = {
         emoji: '🥑'
     },
     
-    // Vegetables
     broccoli: { 
         calories: 31, 
         carbs: 6, 
@@ -204,7 +201,6 @@ const nutritionDB = {
         emoji: '🍠'
     },
     
-    // Other foods (keeping some basics)
     chicken: { calories: 165, carbs: 0, protein: 31, fat: 3.6, fiber: 0 },
     rice: { calories: 130, carbs: 28, protein: 2.7, fat: 0.3, fiber: 0.4 },
     bread: { calories: 79, carbs: 14, protein: 3, fat: 1, fiber: 1.1 },
@@ -212,7 +208,6 @@ const nutritionDB = {
     milk: { calories: 42, carbs: 5, protein: 3.4, fat: 1, fiber: 0 }
 };
 
-// Get all foods by category
 function getFoodsByCategory(category) {
     const results = [];
     
@@ -225,8 +220,8 @@ function getFoodsByCategory(category) {
     return results;
 }
 
-// Function to search for foods in the database
 function searchFood(query) {
+    if (!query || query.trim() === '') return [];
     query = query.toLowerCase();
     const results = [];
     
@@ -237,4 +232,13 @@ function searchFood(query) {
     }
     
     return results;
+}
+
+function getNutritionInfo(foodName) {
+    const food = nutritionDB[foodName.toLowerCase()];
+    return food || null;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { nutritionDB, getFoodsByCategory, searchFood, getNutritionInfo };
 }

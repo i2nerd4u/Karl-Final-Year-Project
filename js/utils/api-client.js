@@ -1,6 +1,5 @@
-// API Client for making authenticated requests to the backend
+// API client for backend requests
 
-// Function to make an authenticated API call
 function callApi(endpoint, method = 'GET', data = null) {
   return new Promise((resolve, reject) => {
     // Get the authentication token
@@ -53,32 +52,26 @@ function callApi(endpoint, method = 'GET', data = null) {
   });
 }
 
-// Function to get user profile
 function getUserProfile() {
   return callApi('/user/me');
 }
 
-// Function to update user profile
 function updateUserProfile(userData) {
   return callApi('/user', 'PUT', userData);
 }
 
-// Function to save calorie goal
 function saveCalorieGoal(goal) {
   return callApi('/user/goal', 'PUT', { calorieGoal: goal });
 }
 
-// Function to get food entries
 function getFoodEntries() {
   return callApi('/food-entries');
 }
 
-// Function to add a food entry
 function addFoodEntry(foodData) {
   return callApi('/food-entry', 'POST', foodData);
 }
 
-// Function to upload an image
 function uploadImage(imageBase64, fileType, userId) {
   return callApi('/upload-image', 'POST', {
     imageBase64: imageBase64,

@@ -1,4 +1,4 @@
-// Centralized user data management to prevent data loss
+// User data helper
 class UserDataManager {
     static updateUserData(newData) {
         const existingData = JSON.parse(localStorage.getItem('userData') || '{}');

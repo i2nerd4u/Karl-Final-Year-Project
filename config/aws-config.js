@@ -1,12 +1,8 @@
-// AWS Configuration for browser-based applications
-// Using Cognito for secure authentication
-
-// Initialize AWS SDK with region
+// AWS config
 AWS.config.update({
     region: 'us-east-1'
 });
 
-// Enable console logging for debugging
 AWS.config.logger = console;
 
 // Cognito Configuration - using hosted UI

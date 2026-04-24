@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loginStatus.style.display = 'block';
     }
     
-    // Local storage fallback for login
     function tryLocalLogin(email, password) {
         const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
         const user = registeredUsers.find(u => u.email === email && u.passwordHash === password);

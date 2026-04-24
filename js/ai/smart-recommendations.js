@@ -1,4 +1,4 @@
-// Smart Recommendations Engine - Uses AI analysis data to provide personalized suggestions
+// Recommendations based on AI analysis data
 class SmartRecommendationsEngine {
     constructor() {
         this.userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -7,7 +7,6 @@ class SmartRecommendationsEngine {
         this.foodEntries = JSON.parse(localStorage.getItem('foodEntries') || '[]');
     }
 
-    // Generate smart meal suggestions based on AI analysis history
     generateMealSuggestions() {
         const userAnalyses = this.aiAnalyses.filter(entry => entry.userId === this.userId);
         
@@ -67,7 +66,6 @@ class SmartRecommendationsEngine {
         return suggestions;
     }
 
-    // Create a smart shopping list based on AI analysis gaps
     generateSmartShoppingList() {
         const userAnalyses = this.aiAnalyses.filter(entry => entry.userId === this.userId);
         const nutritionGaps = this.identifyNutritionGaps(userAnalyses);
@@ -110,7 +108,6 @@ class SmartRecommendationsEngine {
         return shoppingList;
     }
 
-    // Analyze nutrition patterns from AI data
     analyzeNutritionPatterns(analyses) {
         console.log('Analyzing nutrition patterns for', analyses.length, 'entries');
         
@@ -177,7 +174,6 @@ class SmartRecommendationsEngine {
         return patterns;
     }
 
-    // Extract nutrition data from analysis text/object
     extractNutritionFromAnalysis(analysis) {
         let data = { protein: 0, sodium: 0, fiber: 0 };
         
@@ -209,7 +205,6 @@ class SmartRecommendationsEngine {
         return data;
     }
 
-    // Identify nutrition gaps
     identifyNutritionGaps(analyses) {
         try {
             const patterns = this.analyzeNutritionPatterns(analyses);
@@ -231,7 +226,6 @@ class SmartRecommendationsEngine {
     }
 }
 
-// Initialize and display smart recommendations
 function initializeSmartRecommendations() {
     const engine = new SmartRecommendationsEngine();
     
@@ -265,7 +259,6 @@ function initializeSmartRecommendations() {
     refreshRecommendations();
 }
 
-// Refresh recommendations display
 window.refreshRecommendations = function() {
     const engine = new SmartRecommendationsEngine();
     const suggestions = engine.generateMealSuggestions();
@@ -298,7 +291,6 @@ window.refreshRecommendations = function() {
     `).join('');
 };
 
-// Show smart shopping list modal
 window.showSmartShoppingList = function() {
     const engine = new SmartRecommendationsEngine();
     const shoppingList = engine.generateSmartShoppingList();
@@ -344,15 +336,12 @@ window.showSmartShoppingList = function() {
     });
 };
 
-// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait a bit for other initializations to complete
     setTimeout(() => {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         if (isLoggedIn) {
             initializeSmartRecommendations();
             
-            // Auto-refresh recommendations when localStorage changes
             window.addEventListener('storage', function(e) {
                 if (e.key === 'aiAnalysisEntries') {
                     setTimeout(() => refreshRecommendations(), 500);

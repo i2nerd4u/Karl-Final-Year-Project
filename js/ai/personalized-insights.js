@@ -1,4 +1,3 @@
-// Personalized Insights Engine - Uses user dashboard data for personalized recommendations
 class PersonalizedInsightsEngine {
     constructor() {
         this.userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -7,7 +6,6 @@ class PersonalizedInsightsEngine {
         this.foodEntries = JSON.parse(localStorage.getItem('foodEntries') || '[]');
     }
 
-    // Calculate BMI and health metrics
     calculateHealthMetrics() {
         const age = parseInt(this.userData.age) || 25;
         const weight = parseFloat(this.userData.weight) || 70;
@@ -22,8 +20,6 @@ class PersonalizedInsightsEngine {
         else if (bmi >= 25 && bmi < 30) bmiCategory = 'Overweight';
         else if (bmi >= 30) bmiCategory = 'Obese';
 
-        // Calculate BMR (Basal Metabolic Rate) using Mifflin-St Jeor Equation
-        // For simplicity, assuming male calculation (can be enhanced with gender field)
         const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
 
         return {
@@ -37,12 +33,10 @@ class PersonalizedInsightsEngine {
         };
     }
 
-    // Generate personalized insights based on user data and food history
     generatePersonalizedInsights() {
         const healthMetrics = this.calculateHealthMetrics();
         const insights = [];
 
-        // BMI-based recommendations
         if (healthMetrics.bmiCategory === 'Underweight') {
             insights.push({
                 type: 'weight_gain',
@@ -72,7 +66,6 @@ class PersonalizedInsightsEngine {
             });
         }
 
-        // Calorie goal vs BMR analysis
         if (healthMetrics.calorieGoal < healthMetrics.bmr * 0.8) {
             insights.push({
                 type: 'calorie_deficit',
@@ -93,7 +86,6 @@ class PersonalizedInsightsEngine {
             });
         }
 
-        // Age-based recommendations
         if (healthMetrics.age >= 50) {
             insights.push({
                 type: 'age_nutrition',
@@ -114,7 +106,6 @@ class PersonalizedInsightsEngine {
             });
         }
 
-        // Activity level estimation based on calorie goal vs BMR
         const activityRatio = healthMetrics.calorieGoal / healthMetrics.bmr;
         if (activityRatio < 1.2) {
             insights.push({
@@ -136,7 +127,6 @@ class PersonalizedInsightsEngine {
             });
         }
 
-        // Food history analysis
         const userFoodEntries = this.foodEntries.filter(entry => entry.userId === this.userId);
         const recentEntries = userFoodEntries.filter(entry => {
             const entryDate = new Date(entry.timestamp);
@@ -169,7 +159,6 @@ class PersonalizedInsightsEngine {
             }
         }
 
-        // AI analysis insights
         const userAIAnalyses = this.aiAnalyses.filter(entry => entry.userId === this.userId);
         if (userAIAnalyses.length > 0) {
             const nutritionPatterns = this.analyzeNutritionFromAI(userAIAnalyses);
@@ -197,7 +186,6 @@ class PersonalizedInsightsEngine {
             }
         }
 
-        // Default healthy tips if no specific issues found
         if (insights.length === 0) {
             insights.push({
                 type: 'general_health',
@@ -209,10 +197,9 @@ class PersonalizedInsightsEngine {
             });
         }
 
-        return insights.slice(0, 4); // Limit to 4 insights to avoid overwhelming
+        return insights.slice(0, 4);
     }
 
-    // Analyze nutrition patterns from AI data
     analyzeNutritionFromAI(analyses) {
         let totalProtein = 0, totalSodium = 0, count = 0;
         let hasHighSodiumFoods = false;
@@ -236,7 +223,6 @@ class PersonalizedInsightsEngine {
         };
     }
 
-    // Extract nutrition data from analysis text/object
     extractNutritionFromAnalysis(analysis) {
         let data = { protein: 0, sodium: 0 };
         
@@ -251,25 +237,21 @@ class PersonalizedInsightsEngine {
         return data;
     }
 
-    // Generate health score based on various factors
     calculateHealthScore() {
         const healthMetrics = this.calculateHealthMetrics();
         let score = 100;
 
-        // BMI impact
         if (healthMetrics.bmiCategory === 'Underweight' || healthMetrics.bmiCategory === 'Overweight') {
             score -= 15;
         } else if (healthMetrics.bmiCategory === 'Obese') {
             score -= 25;
         }
 
-        // Calorie goal appropriateness
         const calorieRatio = healthMetrics.calorieGoal / healthMetrics.bmr;
         if (calorieRatio < 0.8 || calorieRatio > 1.8) {
             score -= 10;
         }
 
-        // Food tracking consistency
         const userFoodEntries = this.foodEntries.filter(entry => entry.userId === this.userId);
         const recentEntries = userFoodEntries.filter(entry => {
             const entryDate = new Date(entry.timestamp);
@@ -279,7 +261,7 @@ class PersonalizedInsightsEngine {
         });
 
         if (recentEntries.length >= 5) {
-            score += 10; // Bonus for consistent tracking
+            score += 10;
         } else if (recentEntries.length === 0) {
             score -= 15;
         }
@@ -288,26 +270,21 @@ class PersonalizedInsightsEngine {
     }
 }
 
-// Initialize and display personalized insights
 function initializePersonalizedInsights() {
     const engine = new PersonalizedInsightsEngine();
     
-    // Check if user has basic health data
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     if (!userData.age || !userData.weight || !userData.height) {
-        // Show prompt to complete profile
         displayProfilePrompt();
         return;
     }
     
-    // Generate and display insights
     const insights = engine.generatePersonalizedInsights();
     const healthScore = engine.calculateHealthScore();
     
     displayPersonalizedInsights(insights, healthScore);
 }
 
-// Display profile completion prompt
 function displayProfilePrompt() {
     const recommendationsContent = document.getElementById('recommendationsContent');
     if (!recommendationsContent) return;
@@ -320,20 +297,13 @@ function displayProfilePrompt() {
             <p style="margin: 0 0 20px 0; opacity: 0.9; line-height: 1.6;">
                 Tell us your age, weight, and height to get personalized nutrition recommendations based on your health profile and food tracking history.
             </p>
-            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                <button onclick="showHealthInfoModal()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s ease;">
-                    Complete Profile
-                </button>
-                
-            </div>
-            <p style="margin: 15px 0 0 0; opacity: 0.8; font-size: 14px;">
-                💡 If you've already filled your profile on the dashboard, try syncing your data!
-            </p>
+            <a href="user_dashboard.html" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px 24px; border-radius: 25px; font-size: 16px; font-weight: bold; text-decoration: none; display: inline-block; transition: all 0.3s ease;">
+                Complete Profile
+            </a>
         </div>
     `;
 }
 
-// Display personalized insights
 function displayPersonalizedInsights(insights, healthScore) {
     const recommendationsContent = document.getElementById('recommendationsContent');
     if (!recommendationsContent) return;
@@ -344,7 +314,6 @@ function displayPersonalizedInsights(insights, healthScore) {
     recommendationsContent.innerHTML = `
         <h2>Some recommendations from us...</h2>
         
-        <!-- Health Overview Card -->
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 25px; margin: 20px 0; color: white; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div>
@@ -379,7 +348,6 @@ function displayPersonalizedInsights(insights, healthScore) {
             </div>
         </div>
 
-        <!-- Personalized Insights -->
         <div id="personalizedInsightsList">
             ${insights.map(insight => `
                 <div style="background: rgba(255,255,255,0.05); border-left: 4px solid ${insight.color}; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
@@ -395,7 +363,6 @@ function displayPersonalizedInsights(insights, healthScore) {
             `).join('')}
         </div>
 
-        <!-- Action Buttons -->
         <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap;">
             <a href="user_dashboard.html" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; text-decoration: none; padding: 12px 20px; border-radius: 25px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 Go to Dashboard
@@ -407,11 +374,9 @@ function displayPersonalizedInsights(insights, healthScore) {
     `;
 }
 
-// Show health info modal
 function showHealthInfoModal() {
     const modal = document.getElementById('healthInfoModal');
     if (modal) {
-        // Pre-fill with existing data
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
         
         const ageInput = document.getElementById('modalAge');
@@ -428,16 +393,13 @@ function showHealthInfoModal() {
     }
 }
 
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for other initializations to complete
+if (typeof document !== 'undefined' && document.addEventListener) {
+  document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         if (isLoggedIn) {
             initializePersonalizedInsights();
             
-            // Listen for userData changes to auto-refresh insights
             let lastUserData = localStorage.getItem('userData');
             setInterval(() => {
                 const currentUserData = localStorage.getItem('userData');
@@ -448,9 +410,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         initializePersonalizedInsights();
                     }, 300);
                 }
-            }, 1000); // Check every second
+            }, 1000);
             
-            // Re-initialize when health info is updated
             const healthInfoForm = document.getElementById('healthInfoForm');
             if (healthInfoForm) {
                 healthInfoForm.addEventListener('submit', function(e) {
@@ -465,7 +426,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('userData', JSON.stringify(userData));
                     document.getElementById('healthInfoModal').style.display = 'none';
                     
-                    // Update the calorie tracker's goal as well
                     if (window.CalorieTracker && userData.calorieGoal) {
                         window.CalorieTracker.dailyGoal = parseInt(userData.calorieGoal);
                         if (window.CalorieTracker.updateUI) {
@@ -473,7 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                     
-                    // Refresh insights
                     setTimeout(() => {
                         initializePersonalizedInsights();
                     }, 500);
@@ -481,4 +440,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }, 1500);
-});
+  });
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { PersonalizedInsightsEngine, initializePersonalizedInsights };
+}

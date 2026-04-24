@@ -1,6 +1,5 @@
-// Cognito Authentication Handler
+// Cognito Auth
 
-// Initialize the Amazon Cognito Auth
 function initCognitoAuth() {
   const authData = {
     UserPoolId: cognitoConfig.UserPoolId,
@@ -11,7 +10,6 @@ function initCognitoAuth() {
   return userPool;
 }
 
-// Sign in a user
 function signIn(username, password) {
   return new Promise((resolve, reject) => {
     const userPool = initCognitoAuth();
@@ -83,7 +81,6 @@ function signIn(username, password) {
   });
 }
 
-// Sign out the current user
 function signOut() {
   const userPool = initCognitoAuth();
   const cognitoUser = userPool.getCurrentUser();
@@ -105,7 +102,6 @@ function signOut() {
   return false;
 }
 
-// Set up AWS credentials using Cognito Identity Pool
 function setupAWSCredentials(idToken) {
   if (!cognitoConfig.IdentityPoolId) {
     console.warn('Identity Pool ID not configured. Skipping AWS credential setup.');
@@ -130,7 +126,6 @@ function setupAWSCredentials(idToken) {
   });
 }
 
-// Make an authenticated API call
 function callAuthenticatedApi(endpoint, method = 'GET', data = null) {
   return new Promise((resolve, reject) => {
     const idToken = localStorage.getItem('id_token');

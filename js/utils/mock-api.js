@@ -1,4 +1,4 @@
-// Mock API data to use when the real API is unavailable due to CORS issues
+// Mock data for when the API is down
 const mockApiData = {
     users: [
         {
@@ -31,7 +31,6 @@ const mockApiData = {
     ]
 };
 
-// Function to simulate API calls
 async function mockApiCall(endpoint, method = 'GET', body = null) {
     console.log(`Mock API call: ${method} ${endpoint}`);
     

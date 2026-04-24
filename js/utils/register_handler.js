@@ -1,4 +1,4 @@
-// Simple registration handler that stores data in DynamoDB
+// Registration -> DynamoDB
 document.addEventListener('DOMContentLoaded', function() {
     const signupForm = document.getElementById('signupForm');
     
@@ -10,10 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const userData = {
                 userId: 'user_' + Date.now(),
                 name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                weight: document.getElementById('weight').value,
-                height: document.getElementById('height').value,
-                calorieGoal: document.getElementById('Maintence').value
+                email: document.getElementById('email').value
             };
             
             // Store in localStorage

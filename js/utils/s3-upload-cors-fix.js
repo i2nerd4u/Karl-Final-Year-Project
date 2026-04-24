@@ -1,7 +1,6 @@
-// S3 Upload CORS Fix - Direct S3 upload with presigned URLs
+// S3 upload with CORS fallbacks
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Override the existing upload function with CORS-compliant version
     window.uploadToS3AndAnalyze = function(file) {
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
         const userId = userData.userId || 'user_' + Date.now();

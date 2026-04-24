@@ -1,4 +1,3 @@
-// Image Upload Fix - Minimal implementation to make upload work
 document.addEventListener('DOMContentLoaded', function() {
     // Override existing functions with working versions
     setTimeout(() => {

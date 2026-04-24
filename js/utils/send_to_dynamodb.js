@@ -1,4 +1,4 @@
-// DynamoDB integration for registration form
+// DynamoDB save on registration
 document.addEventListener('DOMContentLoaded', function() {
     const signupForm = document.getElementById('signupForm');
     

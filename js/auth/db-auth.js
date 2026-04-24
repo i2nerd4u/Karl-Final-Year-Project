@@ -1,16 +1,10 @@
-// Direct DynamoDB access for authentication
+// DynamoDB auth
 AWS.config.update({
-  region: 'us-east-1',
-  // Use environment variables or AWS SDK credential providers instead of hardcoded credentials
-  // The credentials will be loaded from environment variables or the AWS credential chain
+  region: 'us-east-1'
 });
-
-// For local development, you can use AWS Cognito Identity Pool or temporary credentials
-// See: https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-browser-credentials-cognito.html
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
-// Function to authenticate user directly from DynamoDB
 async function authenticateUser(email, password) {
   try {
     // Scan the users table to find the user with the given email

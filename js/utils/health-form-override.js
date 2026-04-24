@@ -1,4 +1,4 @@
-// Override the health info form to send all fields to DynamoDB
+// Sends health info form data to DynamoDB
 (function() {
     function fixHealthForm() {
         const form = document.getElementById('healthInfoForm');

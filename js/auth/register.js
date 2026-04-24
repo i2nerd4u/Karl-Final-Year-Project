@@ -35,11 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const userData = {
                 userId: 'user_' + Date.now(),
                 name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                age: parseInt(document.getElementById('age').value),
-                weight: parseFloat(document.getElementById('weight').value),
-                height: parseInt(document.getElementById('height').value),
-                calorieGoal: parseInt(document.getElementById('Maintence').value)
+                email: document.getElementById('email').value
             };
             
             showStatus("Creating your account...", true);
